@@ -1,5 +1,5 @@
-target_link_libraries(p2ren
-PRIVATE
-    SDL3::SDL3
-    glad
-)
+add_subdirectory(fmt)
+add_subdirectory(glad)
+add_subdirectory(glm)
+add_subdirectory(SDL)
+add_subdirectory(SDL_image)
