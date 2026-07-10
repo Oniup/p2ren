@@ -27,7 +27,8 @@ set(ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "Root Directory")
 set(ROOT_SRC_DIR "${ROOT_DIRECTORY}/src" CACHE INTERNAL "Root source directory")
 
 # Options
-option(BUILD_MAIN_EXAMPLE "Build example executable" ON)
+option(P2REN_BUILD_EXAMPLE "Build example executable" ON)
+option(P2REN_OPENGL_BACKEND "Build OpenGL backend" ON)
 
 # Library
 # ==============================================================================
@@ -37,7 +38,7 @@ add_subdirectory(thirdparty SYSTEM)
 
 # Modules
 add_subdirectory(src/p2ren_core)
-# add_subdirectory(src/p2ren_render_hardware)
+add_subdirectory(src/p2ren_render_hardware)
 # add_subdirectory(src/p2ren_renderer)
 # add_subdirectory(src/p2ren_world)
 
@@ -46,13 +47,13 @@ add_library(p2ren INTERFACE)
 target_link_libraries(p2ren
 INTERFACE
     p2ren_core
+    p2ren_rhi
 )
 target_link_libraries(p2ren
 INTERFACE
     ${ROOT_SRC_DIR}
 )
 
-
-if (${BUILD_MAIN_EXAMPLE})
+if (${P2REN_BUILD_EXAMPLE})
     add_subdirectory(src/p2ren_example)
 endif()
