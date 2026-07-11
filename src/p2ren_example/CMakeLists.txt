@@ -1,5 +1,7 @@
 add_executable(p2ren_example
-    main.cpp
+    ./program.h
+    ./program.cpp
+    ./main.cpp
 )
 
 target_link_libraries(p2ren_example

@@ -1,11 +1,11 @@
-#include "p2ren_render_hardware/context.h"
+#include "p2ren_renderer/renderer.h"
 
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_video.h>
 #include <glad/gl.h>
 
 #include "p2ren_core/application_descriptor.h"
-#include "p2ren_core/error.h"
+#include "p2ren_core/utility/error.h"
 #include "p2ren_core/window.h"
 
 namespace p2ren {
@@ -54,12 +54,12 @@ void GLAPIENTRY glDebugOutputCallback(GLenum source, GLenum type, unsigned int i
     }
 }
 
-RHI_Context::~RHI_Context()
+Renderer::~Renderer()
 {
     Terminate();
 }
 
-void RHI_Context::Initialize(const RendererDescriptor& descriptor)
+void Renderer::Initialize(const RendererDescriptor& descriptor)
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
         P2REN_FATAL("Failed to initialize SDL: {}", SDL_GetError());
@@ -76,7 +76,7 @@ void RHI_Context::Initialize(const RendererDescriptor& descriptor)
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 }
 
-void RHI_Context::InitializeBackend(const Window& window, const RendererDescriptor& descriptor)
+void Renderer::InitializeBackend(const Window& window, const RendererDescriptor& descriptor)
 {
     m_InternalContext = SDL_GL_CreateContext(window.GetInternalContext());
     if (!m_InternalContext)
@@ -107,7 +107,7 @@ void RHI_Context::InitializeBackend(const Window& window, const RendererDescript
     }
 }
 
-void RHI_Context::Terminate()
+void Renderer::Terminate()
 {
     if (m_InternalContext)
     {
@@ -116,7 +116,7 @@ void RHI_Context::Terminate()
     }
 }
 
-void RHI_Context::SwapBuffers(const Window& window)
+void Renderer::SwapBuffers(const Window& window)
 {
     SDL_GL_SwapWindow(window.GetInternalContext());
 }

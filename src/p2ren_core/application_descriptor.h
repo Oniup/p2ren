@@ -1,6 +1,6 @@
 #pragma once
 
-#include "p2ren_core/error.h"
+#include "p2ren_core/utility/error.h"
 #include "p2ren_core/window.h"
 
 namespace p2ren {

@@ -25,10 +25,6 @@ void Application::Initialize(const ApplicationDescriptor& descriptor)
     m_RenderHardwareContext.InitializeBackend(m_Window, descriptor.Renderer);
 }
 
-void Application::AttachPlugins()
-{
-}
-
 void Application::Run()
 {
     SDL_Event event;

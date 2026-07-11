@@ -8,17 +8,20 @@ PUBLIC
 
 target_sources(p2ren_core
 PUBLIC
-    application.h
-    application_descriptor.h
-    error.h
-    hash.h
-    plugin.h
-    type_info.h
-    window.h
+    ./utility/color.h
+    ./utility/error.h
+    ./utility/hash.h
+    ./utility/type_info.h
+    ./application.h
+    ./application_descriptor.h
+    ./resource_manager.h
+    ./window.h
 PRIVATE
-    intern/application.cpp
-    intern/error.cpp
-    intern/window.cpp
+    ./utility/color.cpp
+    ./utility/error.cpp
+    ./application.cpp
+    ./resource_manager.cpp
+    ./window.cpp
 )
 
 # Options

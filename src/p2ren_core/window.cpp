@@ -89,6 +89,7 @@ Window::Window(const std::string& title, int32_t width, int32_t height, WindowFl
         P2REN_FATAL("Failed to create SDL window: {}", SDL_GetError());
 
     P2REN_INFO("Create window with resolution: {}, {}", width, height);
+    SDL_RaiseWindow(m_Window); // Focuses the window
 }
 
 Window::Window(const std::string& title, WindowResolution resolution, WindowFlags flags)

@@ -5,7 +5,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "p2ren_core/hash.h"
+#include "p2ren_core/utility/hash.h"
 
 namespace p2ren::intern {
 
@@ -153,7 +153,7 @@ struct TypeInfo
         return std::string_view(name.data(), name.size());
     }
 
-    static constexpr uint64_t GetHash()
+    static constexpr uint64_t GetUUID()
     {
         std::string_view name = GetName();
         return FNV::Get32(name);

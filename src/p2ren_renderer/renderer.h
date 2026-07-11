@@ -7,10 +7,10 @@ namespace p2ren {
 struct RendererDescriptor;
 class Window;
 
-class RHI_Context
+class Renderer
 {
 public:
-    ~RHI_Context();
+    ~Renderer();
 
     void Initialize(const RendererDescriptor& descriptor);
     void InitializeBackend(const Window& window, const RendererDescriptor& descriptor);
