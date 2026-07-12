@@ -3,6 +3,8 @@
 #include <SDL3/SDL_events.h>
 #include <fmt/base.h>
 
+#include "p2ren_renderer/rhi/shader.h"
+
 namespace p2ren {
 
 void Application::Initialize(const ApplicationDescriptor& descriptor)
@@ -27,6 +29,8 @@ void Application::Initialize(const ApplicationDescriptor& descriptor)
 
 void Application::Run()
 {
+    Shader shader;
+
     SDL_Event event;
     while (m_Window.IsOpen())
     {

@@ -14,6 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF) # For cross platform/compiler compatibility
 # ==============================================================================
 # Options
 option(P2REN_BUILD_EXAMPLE "Build example executable" ON)
+option(P2REN_SHADER_HOT_RELOAD "Allows for hot reloading shaders. Shaders will still their paths now" ON)
 
 # Build directory setup for when building example is enabled
 if (P2REN_BUILD_EXAMPLE)

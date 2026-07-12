@@ -1,8 +1,7 @@
 #pragma once
 
-#include <ankerl/unordered_dense.h>
-
 #include "p2ren_core/application_descriptor.h"
+#include "p2ren_core/resource_manager.h"
 #include "p2ren_core/window.h"
 #include "p2ren_renderer/renderer.h"
 
@@ -24,8 +23,9 @@ public:
 private:
     void InitializeMandetoryPlugins();
 
-    Renderer m_RenderHardwareContext;
-    Window   m_Window;
+    Window          m_Window;
+    ResourceManager m_ResourceManager;
+    Renderer        m_RenderHardwareContext;
 };
 
 } // namespace p2ren

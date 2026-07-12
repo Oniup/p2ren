@@ -14,13 +14,13 @@ PUBLIC
     ./utility/type_info.h
     ./application.h
     ./application_descriptor.h
+    ./resource_handle.h
     ./resource_manager.h
     ./window.h
 PRIVATE
     ./utility/color.cpp
     ./utility/error.cpp
     ./application.cpp
-    ./resource_manager.cpp
     ./window.cpp
 )
 

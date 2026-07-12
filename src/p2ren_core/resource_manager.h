@@ -7,54 +7,11 @@
 #include <string>
 #include <vector>
 
+#include "p2ren_core/resource_handle.h"
 #include "p2ren_core/utility/error.h"
 #include "p2ren_core/utility/type_info.h"
 
 namespace p2ren {
-
-constexpr static uint32_t InvalidResourceHandleID = 0xFFFFFFFF;
-
-template <typename T>
-class ResourcePool;
-
-template <typename T>
-class ResourceHandle
-{
-    friend ResourcePool<T>;
-
-public:
-    static constexpr std::string_view TypeName = TypeInfo<T>::GetName();
-    static constexpr uint64_t         TypeID   = TypeInfo<T>::GetUUID();
-
-    ResourceHandle()
-        : m_ID(InvalidResourceHandleID)
-    {
-    }
-
-    bool IsValid() const { return m_ID != InvalidResourceHandleID; }
-    bool operator==(const ResourceHandle& other) const { return m_ID == other.m_ID; }
-
-private:
-    ResourceHandle(uint16_t index, uint16_t generation)
-        : m_Index(index),
-          m_Generation(generation)
-    {
-    }
-
-    ResourceHandle(uint32_t id)
-        : m_ID(id)
-    {
-    }
-
-    union {
-        uint32_t m_ID = InvalidResourceHandleID; /// Combined resource ID
-        struct
-        {
-            uint16_t m_Index;      // Resource pool index
-            uint16_t m_Generation; // Starts at 0 but increments when slot is reused
-        };
-    };
-};
 
 class IResourcePool
 {
@@ -115,7 +72,7 @@ public:
                handle.m_Generation == m_Generations[handle.m_Index];
     }
 
-    T* Query(const ResourceHandle<T>& handle)
+    T* QueryResource(const ResourceHandle<T>& handle)
     {
         if (Contains(handle))
             return &m_Data[handle.m_Index];
@@ -126,7 +83,7 @@ public:
         return nullptr;
     }
 
-    const T* Query(const ResourceHandle<T>& handle) const
+    const T* QueryResource(const ResourceHandle<T>& handle) const
     {
         if (Contains(handle))
             return &m_Data[handle.m_Index];
@@ -139,7 +96,7 @@ public:
 
     /// Finds resource with corresponding name otherwise returns invalid handle. This method is very
     /// slow and should be avoided during runtime.
-    ResourceHandle<T> Query(std::string_view name)
+    ResourceHandle<T> QueryHandle(std::string_view name) const
     {
         for (size_t i = 0; i < m_Names.size(); i++)
         {
@@ -150,7 +107,7 @@ public:
     }
 
     /// Returns the name of the resource handle, if it doesn't exist, then an empty string
-    std::string_view QueryName(const ResourceHandle<T>& handle) const
+    std::string_view QueryHandleName(const ResourceHandle<T>& handle) const
     {
         if (Contains(handle))
             return m_Names[handle.m_Index];
@@ -161,9 +118,9 @@ public:
     {
         if (Contains(handle))
         {
-            m_Data[handle.m_Index].~T();
+            m_Data[handle.m_Index]         = T();
             m_Generations[handle.m_Index] += 1; // Increment resource
-
+            m_FreeSlots.push_back(handle.m_Index);
             return;
         }
         P2REN_WARN("Attempt to destroy resource '{}' with ID {}, it doesn't exist within pool",
@@ -196,34 +153,68 @@ public:
                        TypeInfo<T>::GetName());
             return;
         }
-
         m_ResourcePools.insert(
             {TypeInfo<T>::GetUUID(),
-             std::make_unique(ResourcePool<T>(initial_capacity, initial_free_slot_capacity))});
+             std::make_unique<ResourcePool<T>>(initial_capacity, initial_free_slot_capacity)});
     }
 
     template <typename T>
     ResourceHandle<T> PushResource(std::string_view name, T&& resource)
     {
-        constexpr uint64_t type_id = TypeInfo<T>::GetUUID();
-
         // If doesn't exist, create a pool
         if (!ContainsPool<T>())
             InitializePool<T>();
 
         // Push resource
-        if (m_ResourcePools.contains(type_id))
-        {
-            auto pool = static_cast<ResourcePool<T>*>(m_ResourcePools.at(type_id).get());
-            pool->Push(name, std::move(resource));
-        }
-        return ResourceHandle<T>();
+        constexpr uint64_t type_id = TypeInfo<T>::GetUUID();
+        auto               pool = static_cast<ResourcePool<T>*>(m_ResourcePools.at(type_id).get());
+        return pool->Push(name, std::move(resource));
     }
 
-    // TODO: Implement:
-    //          - Query Resource
-    //          - Query resource using name
-    //          - Query Name
+    template <typename T>
+    T* QueryResource(const ResourceHandle<T>& handle)
+    {
+        if (!ContainsPool<T>())
+            return nullptr;
+
+        auto pool = static_cast<ResourcePool<T>*>(m_ResourcePools.at(TypeInfo<T>::GetUUID()).get());
+        return pool->QueryResource(handle);
+    }
+
+    template <typename T>
+    const T* QueryResource(const ResourceHandle<T>& handle) const
+    {
+        if (!ContainsPool<T>())
+            return nullptr;
+
+        auto pool =
+            static_cast<const ResourcePool<T>*>(m_ResourcePools.at(TypeInfo<T>::GetUUID()).get());
+        return pool->QueryResource(handle);
+    }
+
+    template <typename T>
+    std::string_view QueryResourceName(const ResourceHandle<T>& handle) const
+    {
+        if (!ContainsPool<T>())
+            return "";
+
+        auto pool =
+            static_cast<const ResourcePool<T>*>(m_ResourcePools.at(TypeInfo<T>::GetUUID()).get());
+        return pool->QueryHandleName(handle);
+    }
+
+    /// Finds resource with corresponding name otherwise returns invalid handle. This method is very
+    /// slow and should be avoided during runtime.
+    template <typename T>
+    ResourceHandle<T> QueryHandle(std::string_view name) const
+    {
+        if (!ContainsPool<T>())
+            return ResourceHandle<T>();
+
+        auto pool =
+            static_cast<const ResourcePool<T>*>(m_ResourcePools.at(TypeInfo<T>::GetUUID()).get());
+        return pool->QueryHandle(name);
+    }
 
 private:
     ankerl::unordered_dense::map<uint64_t, std::unique_ptr<IResourcePool>> m_ResourcePools;

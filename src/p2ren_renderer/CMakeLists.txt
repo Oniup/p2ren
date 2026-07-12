@@ -26,6 +26,11 @@ PRIVATE
 
 )
 
+target_compile_definitions(p2ren_renderer
+PRIVATE
+    P2REN_SHADER_HOT_RELOAD=$<BOOL:${P2REN_SHADER_HOT_RELOAD}>
+)
+
 # Dependencies
 # ==============================================================================
 target_link_libraries(p2ren_renderer

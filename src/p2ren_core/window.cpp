@@ -4,7 +4,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
 
-#include "p2ren_core/error.h"
+#include "p2ren_core/utility/error.h"
 
 namespace p2ren {
 
