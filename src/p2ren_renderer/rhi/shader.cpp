@@ -132,6 +132,25 @@ Shader::~Shader()
     }
 }
 
+Shader::Shader(Shader&& other)
+    : m_ID(other.m_ID)
+{
+    other.m_ID = 0;
+}
+
+Shader& Shader::operator=(Shader&& other)
+{
+    if (m_ID == other.m_ID)
+    {
+        if (m_ID != 0)
+            glDeleteProgram(m_ID);
+
+        m_ID       = other.m_ID;
+        other.m_ID = 0;
+    }
+    return *this;
+}
+
 void Shader::Bind()
 {
     glUseProgram(m_ID);

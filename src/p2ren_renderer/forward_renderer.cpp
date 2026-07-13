@@ -32,11 +32,17 @@ void ForwardRenderer::InitializeBackend()
     m_Context->InitializeBackend();
 }
 
-void ForwardRenderer::InitializeResourcePools()
+void ForwardRenderer::InitializeResources()
 {
     ResourceManager* resources = Application::GetResourceManager();
 
+    // Initialize pools
     resources->InitializePool<Shader>(ShaderPoolInitialCapacity);
+
+    // Initialize default resources
+    resources->PushResource<Shader>("Flat Color shader",
+                                    Shader(resources->GetAssetPath("shaders/base.vert"),
+                                           resources->GetAssetPath("shaders/flat_color.frag")));
 }
 
 void ForwardRenderer::SwapBuffers()

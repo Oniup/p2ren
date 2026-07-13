@@ -20,9 +20,15 @@ public:
     Shader(std::string_view vertex, std::string_view fragment, std::string_view geometry = "");
     ~Shader();
 
+    Shader(Shader&& other);
+    Shader& operator=(Shader&& other);
+
+    Shader(const Shader& other)            = delete;
+    Shader& operator=(const Shader& other) = delete;
+
     void     Bind();
     bool     IsValid() const;
-    uint32_t GetInternalID() const { return m_ID; }
+    uint32_t GetID() const { return m_ID; }
 
     void PushConstant(std::string_view location, int32_t val);
     void PushConstant(std::string_view location, uint32_t val);

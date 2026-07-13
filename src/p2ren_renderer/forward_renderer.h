@@ -16,7 +16,7 @@ public:
     ~ForwardRenderer();
 
     void InitializeBackend();
-    void InitializeResourcePools();
+    void InitializeResources();
 
     void SwapBuffers();
 

@@ -10,6 +10,24 @@
 
 ## High-Level Architecture
 
+### Project structure
+
+```
+\assets
+    \models
+    \maps
+    \textures
+    \shaders
+\src
+    \p2ren_core     -- All modules below include, Window, Application facade
+    \p2ren_renderer -- Forward renderer with OpenGL backend
+    \p2ren_world    -- Managing the ECS and level population
+    \p2ren_example  -- Example executable that loads the example map
+CMakeLists.txt
+...
+README.md
+```
+
 ### Libraries
 
 - **SDL:** Platform specific such as window handling, audio.
