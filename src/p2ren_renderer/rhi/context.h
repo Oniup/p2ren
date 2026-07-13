@@ -4,22 +4,17 @@ typedef struct SDL_GLContextState* SDL_GLContext;
 
 namespace p2ren {
 
-struct RendererDescriptor;
-class Window;
-
-class Renderer
+class RHIContext
 {
 public:
-    ~Renderer();
+    RHIContext(bool enable_hardware_debug_callback);
+    ~RHIContext();
 
-    void Initialize(const RendererDescriptor& descriptor);
-    void InitializeBackend(const Window& window, const RendererDescriptor& descriptor);
+    void InitializeBackend();
     void Terminate();
 
     SDL_GLContext       GetInternalContext() { return m_InternalContext; }
     const SDL_GLContext GetInternalContext() const { return m_InternalContext; }
-
-    void SwapBuffers(const Window& window);
 
 private:
     SDL_GLContext m_InternalContext = nullptr;

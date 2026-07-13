@@ -21,8 +21,9 @@ public:
     Shader(std::string_view vertex, std::string_view fragment, std::string_view geometry = "");
     ~Shader();
 
-    void Bind();
-    bool Valid();
+    void     Bind();
+    bool     Valid() const;
+    uint32_t GetInternalID() const { return m_ID; }
 
     void PushConstant(std::string_view location, int32_t val);
     void PushConstant(std::string_view location, uint32_t val);
@@ -34,8 +35,6 @@ public:
 
     void PushConstant(std::string_view location, const glm::mat3& val);
     void PushConstant(std::string_view location, const glm::mat4& val);
-
-    uint32_t GetInternalID() const { return m_ID; }
 
 private:
     uint32_t GetUniformLocation(std::string_view location);

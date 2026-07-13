@@ -137,7 +137,7 @@ void Shader::Bind()
     glUseProgram(m_ID);
 }
 
-bool Shader::Valid()
+bool Shader::Valid() const
 {
     return m_ID != 0;
 }
@@ -149,31 +149,37 @@ void Shader::PushConstant(std::string_view location, int32_t val)
 
 void Shader::PushConstant(std::string_view location, uint32_t val)
 {
-    glUniform1i(GetUniformLocation(location), val);
+    glUniform1ui(GetUniformLocation(location), val);
 }
 
 void Shader::PushConstant(std::string_view location, float val)
 {
+    glUniform1f(GetUniformLocation(location), val);
 }
 
 void Shader::PushConstant(std::string_view location, const glm::vec2& val)
 {
+    glUniform2fv(GetUniformLocation(location), 1, &val[0]);
 }
 
 void Shader::PushConstant(std::string_view location, const glm::vec3& val)
 {
+    glUniform3fv(GetUniformLocation(location), 1, &val[0]);
 }
 
 void Shader::PushConstant(std::string_view location, const glm::vec4& val)
 {
+    glUniform4fv(GetUniformLocation(location), 1, &val[0]);
 }
 
 void Shader::PushConstant(std::string_view location, const glm::mat3& val)
 {
+    glUniformMatrix3fv(GetUniformLocation(location), 1, GL_FALSE, &val[0][0]);
 }
 
 void Shader::PushConstant(std::string_view location, const glm::mat4& val)
 {
+    glUniformMatrix4fv(GetUniformLocation(location), 1, GL_FALSE, &val[0][0]);
 }
 
 uint32_t Shader::GetUniformLocation(std::string_view location)

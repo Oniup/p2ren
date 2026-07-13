@@ -63,17 +63,18 @@
 
 - Start learn 3D editor of choice.
 - Hard code assets.
+- World representation
 - RHI.
-  - Shader, Texture, Buffer and Framebuffer (rough setup for MSAA support to implement later).
+  - Shader, Texture and Buffer.
   - Texture and Framebuffer should use descriptors to create.
   - Textures should support cubemaps
 - Renderer.
   - Blinn-Phong.
-- Resources.
-  - Load FBX and obj models.
 
 ### Week 2 (Level parser)
 
+- Resources.
+  - Load FBX and obj models.
 - Continue learning 2D editor of choice if I still don't feel comfortable yet.
 - Event dispatcher and input manager.
 - Level parser.

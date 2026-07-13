@@ -1,10 +1,10 @@
-#include "p2ren_renderer/renderer.h"
+#include "p2ren_renderer/rhi/context.h"
 
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_video.h>
 #include <glad/gl.h>
 
-#include "p2ren_core/application_descriptor.h"
+#include "p2ren_core/application.h"
 #include "p2ren_core/utility/error.h"
 #include "p2ren_core/window.h"
 
@@ -54,12 +54,7 @@ void GLAPIENTRY glDebugOutputCallback(GLenum source, GLenum type, unsigned int i
     }
 }
 
-Renderer::~Renderer()
-{
-    Terminate();
-}
-
-void Renderer::Initialize(const RendererDescriptor& descriptor)
+RHIContext::RHIContext(bool enable_hardware_debug_callback)
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
         P2REN_FATAL("Failed to initialize SDL: {}", SDL_GetError());
@@ -72,33 +67,38 @@ void Renderer::Initialize(const RendererDescriptor& descriptor)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);         // Screen framebuffer doesn't require
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);       // Screen framebuffer doesn't require
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Disable software rendering
-    if (descriptor.EnableOpenGLDebugCallback)          // Enable Debug error callback
+
+    if (enable_hardware_debug_callback)
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 }
 
-void Renderer::InitializeBackend(const Window& window, const RendererDescriptor& descriptor)
+RHIContext::~RHIContext()
 {
-    m_InternalContext = SDL_GL_CreateContext(window.GetInternalContext());
+    Terminate();
+}
+
+void RHIContext::InitializeBackend()
+{
+    SDL_Window* window = Application::GetWindow()->GetInternalContext();
+    m_InternalContext  = SDL_GL_CreateContext(window);
     if (!m_InternalContext)
         P2REN_FATAL("Failed to initialize OpenGL context: {}", SDL_GetError());
 
+    // Initialize glad
     int glad_version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
     if (glad_version == 0)
     {
         Terminate();
         P2REN_FATAL("Failed to initialize OpenGL pointer functions through glad loader");
     }
-
     P2REN_INFO("Initialized OpenGL {}.{}",
                GLAD_VERSION_MAJOR(glad_version),
                GLAD_VERSION_MINOR(glad_version));
 
-    int32_t width, height;
-    window.GetSize(&width, &height);
-    glViewport(0, 0, width, height);
-
     // Debug callback setup
-    if (descriptor.EnableOpenGLDebugCallback)
+    int32_t flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -107,18 +107,15 @@ void Renderer::InitializeBackend(const Window& window, const RendererDescriptor&
     }
 }
 
-void Renderer::Terminate()
+void RHIContext::Terminate()
 {
     if (m_InternalContext)
     {
         SDL_GL_DestroyContext(m_InternalContext);
         SDL_Quit();
-    }
-}
 
-void Renderer::SwapBuffers(const Window& window)
-{
-    SDL_GL_SwapWindow(window.GetInternalContext());
+        m_InternalContext = nullptr;
+    }
 }
 
 } // namespace p2ren

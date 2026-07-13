@@ -1,5 +1,4 @@
 #include "p2ren_core/application_descriptor.h"
-#include "p2ren_core/utility/color.h"
 #include "p2ren_example/program.h"
 
 int main()

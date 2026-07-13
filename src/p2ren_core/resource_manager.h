@@ -1,7 +1,10 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
+#include <fmt/format.h>
+#include <fmt/std.h>
 
+#include <concepts>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -63,7 +66,7 @@ public:
             m_Names.push_back(std::string(name));
             m_Generations.push_back(0);
         }
-        return ResourceHandle(index, m_Generations[index]);
+        return ResourceHandle<T>(index, m_Generations[index]);
     }
 
     bool Contains(const ResourceHandle<T>& handle) const
@@ -132,11 +135,40 @@ private:
     std::vector<T> m_Data; // Packed resource data
 };
 
+// https://blog.andreiavram.ro/object-has-method-cpp20-concepts/
+template <typename T>
+concept ResourceHasValidMethod = requires(T resource) {
+    { resource.Valid() } -> std::same_as<bool>;
+};
+
 class ResourceManager
 {
 public:
-    ResourceManager()  = default;
+    ResourceManager(std::string_view path)
+        : m_AssetDirectory(path)
+    {
+    }
     ~ResourceManager() = default;
+
+    const std::string& GetAssetDirectory() const { return m_AssetDirectory; }
+
+    std::string GetAssetPath(std::string_view path) const
+    {
+        return fmt::format("{}/{}", m_AssetDirectory, path);
+    }
+
+    const char* GetAssetPath(std::string_view path, size_t max_buffer_size, char* buffer) const
+    {
+        auto result = fmt::format_to_n(buffer, max_buffer_size, "{}/{}", m_AssetDirectory, path);
+        *result.out = '\0';
+        if (result.size >= max_buffer_size - 1)
+            P2REN_ERROR("Buffer (max size {}) provided to format path {}/{} was not large enough, "
+                        "result has been cut off",
+                        max_buffer_size,
+                        m_AssetDirectory,
+                        path);
+        return buffer;
+    }
 
     template <typename T>
     bool ContainsPool()
@@ -147,6 +179,9 @@ public:
     template <typename T>
     void InitializePool(size_t initial_capacity = 100, size_t initial_free_slot_capacity = 0)
     {
+        static_assert(ResourceHasValidMethod<T>,
+                      "Resource must have a defined Valid() for storing in a resource pool");
+
         if (ContainsPool<T>())
         {
             P2REN_WARN("Attempt to initialize pool for resource {} but it already exists",
@@ -163,7 +198,13 @@ public:
     {
         // If doesn't exist, create a pool
         if (!ContainsPool<T>())
-            InitializePool<T>();
+        {
+            P2REN_ERROR(
+                "Failed to push resource for type: {0}, it pool doesn't exist, need to call "
+                "InitializePool<{0}>() on program startup",
+                TypeInfo<T>::GetName());
+            return ResourceHandle<T>();
+        }
 
         // Push resource
         constexpr uint64_t type_id = TypeInfo<T>::GetUUID();
@@ -217,6 +258,7 @@ public:
     }
 
 private:
+    std::string                                                            m_AssetDirectory;
     ankerl::unordered_dense::map<uint64_t, std::unique_ptr<IResourcePool>> m_ResourcePools;
 };
 

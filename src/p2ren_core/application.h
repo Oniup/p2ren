@@ -1,31 +1,39 @@
 #pragma once
 
+#include <string>
+
 #include "p2ren_core/application_descriptor.h"
-#include "p2ren_core/resource_manager.h"
-#include "p2ren_core/window.h"
-#include "p2ren_renderer/renderer.h"
 
 namespace p2ren {
+
+class ForwardRenderer;
+class Window;
+class ResourceManager;
 
 class Application
 {
 public:
-    virtual ~Application() = default;
+    Application();
+    virtual ~Application();
     void Initialize(const ApplicationDescriptor& descriptor);
 
     virtual void AttachEntityDescriptors() = 0;
 
     void Run();
 
-    Window&       GetWindow() { return m_Window; }
-    const Window& GetWindow() const { return m_Window; }
+    static Window*          GetWindow() { return s_Application->m_Window; }
+    static ResourceManager* GetResourceManager() { return s_Application->m_ResourceManager; }
 
 private:
-    void InitializeMandetoryPlugins();
+    /// Iterate over all directories and check if its the 'assets' folder, otherwise check the
+    /// parent path until successfully found the directory. Will crash if can't find.
+    static std::string FindAssetDirectory();
 
-    Window          m_Window;
-    ResourceManager m_ResourceManager;
-    Renderer        m_RenderHardwareContext;
+    static Application* s_Application;
+
+    ForwardRenderer* m_Renderer        = nullptr;
+    Window*          m_Window          = nullptr;
+    ResourceManager* m_ResourceManager = nullptr;
 };
 
 } // namespace p2ren
