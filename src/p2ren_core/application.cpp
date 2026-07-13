@@ -1,9 +1,11 @@
 #include "p2ren_core/application.h"
 
+#include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <fmt/base.h>
 
 #include <filesystem>
+#include <string_view>
 
 #include "p2ren_core/resource_manager.h"
 #include "p2ren_core/window.h"
@@ -69,22 +71,28 @@ void Application::Initialize(const ApplicationDescriptor& descriptor)
 
 std::string Application::FindAssetDirectory()
 {
-    namespace fs               = std::filesystem;
-    fs::path working_directory = fs::current_path();
-    while (working_directory.has_parent_path())
-    {
-        // Iterate over directories
-        auto enumerate_directories = fs::directory_iterator(working_directory);
-        for (const fs::directory_entry& entry : enumerate_directories)
-        {
-            if (entry.is_directory() && entry.path().filename() == "assets")
-                return entry.path().string();
+    namespace fs = std::filesystem;
 
-            // Couldn't find assets path, check parent path
-            working_directory = entry.path().parent_path();
-        }
+    std::string_view base_path(GetBasePath());
+    fs::path         working_directory(base_path);
+
+    // Iterate over parent paths to check if it contains an "assets" directory
+    while (true)
+    {
+        // Check if target asset path exists
+        fs::path potential_path = working_directory / "assets";
+        if (fs::exists(potential_path) && fs::is_directory(potential_path))
+            return potential_path.string();
+
+        // Doesn't exist? Check if parent path exists
+        if (!working_directory.has_parent_path() ||
+            working_directory == working_directory.parent_path())
+            break;
+
+        // Move to that parent path
+        working_directory = working_directory.parent_path();
     }
-    P2REN_FATAL("Failed to find asset directory starting from path {}", working_directory);
+    P2REN_FATAL("Failed to find asset directory starting from path {}", base_path);
 }
 
 void Application::Run()
@@ -100,6 +108,13 @@ void Application::Run()
 
         m_Renderer->SwapBuffers();
     }
+}
+
+std::string_view Application::GetBasePath()
+{
+    const char* base_path = SDL_GetBasePath();
+    P2REN_ASSERT(base_path, "Base path is set to nullptr: {}", SDL_GetError());
+    return std::string_view(base_path);
 }
 
 } // namespace p2ren

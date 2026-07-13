@@ -24,9 +24,6 @@ if (P2REN_BUILD_EXAMPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}")
 endif(0)
 
-set(ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "Root Directory")
-set(ROOT_SRC_DIR "${ROOT_DIRECTORY}/src" CACHE INTERNAL "Root source directory")
-
 # Library
 # ==============================================================================
 add_subdirectory(thirdparty SYSTEM) # Thirdparty
@@ -36,17 +33,18 @@ add_subdirectory(src/p2ren_core)
 add_subdirectory(src/p2ren_renderer)
 # add_subdirectory(src/p2ren_world) # Not started yet
 
-# P2Ren interface library
+# Main interface library
 add_library(p2ren INTERFACE)
 target_link_libraries(p2ren
 INTERFACE
-    p2ren_core
-    p2ren_renderer
+    p2ren::core
+    p2ren::renderer
 )
-target_link_libraries(p2ren
+target_include_directories(p2ren
 INTERFACE
-    $<BUILD_INTERFACE:${ROOT_SRC_DIR}>
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+add_library(p2ren::p2ren ALIAS p2ren)
 
 if (${P2REN_BUILD_EXAMPLE})
     add_subdirectory(src/p2ren_example)

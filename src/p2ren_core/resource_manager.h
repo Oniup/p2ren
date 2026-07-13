@@ -138,7 +138,7 @@ private:
 // https://blog.andreiavram.ro/object-has-method-cpp20-concepts/
 template <typename T>
 concept ResourceHasValidMethod = requires(T resource) {
-    { resource.Valid() } -> std::same_as<bool>;
+    { resource.IsValid() } -> std::same_as<bool>;
 };
 
 class ResourceManager
@@ -148,7 +148,6 @@ public:
         : m_AssetDirectory(path)
     {
     }
-    ~ResourceManager() = default;
 
     const std::string& GetAssetDirectory() const { return m_AssetDirectory; }
 
@@ -196,6 +195,13 @@ public:
     template <typename T>
     ResourceHandle<T> PushResource(std::string_view name, T&& resource)
     {
+        if (!resource.IsValid())
+        {
+            P2REN_ERROR("Cannot add a {} resource that isn't valid on initialization",
+                        TypeInfo<T>::GetName());
+            return ResourceHandle<T>();
+        }
+
         // If doesn't exist, create a pool
         if (!ContainsPool<T>())
         {

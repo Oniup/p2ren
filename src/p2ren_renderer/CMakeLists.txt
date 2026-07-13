@@ -3,7 +3,7 @@
 add_library(p2ren_renderer STATIC)
 target_include_directories(p2ren_renderer
 PUBLIC
-    ${ROOT_SRC_DIR}
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 target_sources(p2ren_renderer
@@ -46,4 +46,6 @@ PRIVATE
     glad
 )
 
-
+# Alias for external linking
+# ==============================================================================
+add_library(p2ren::renderer ALIAS p2ren_renderer)

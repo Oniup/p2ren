@@ -3,7 +3,7 @@
 add_library(p2ren_core STATIC)
 target_include_directories(p2ren_core
 PUBLIC
-    ${ROOT_SRC_DIR}
+    ${CMAKE_SOURCE_DIR}/src
 )
 
 target_sources(p2ren_core
@@ -44,3 +44,6 @@ PRIVATE
     SDL3::SDL3
 )
 
+# Alias for external linking
+# ==============================================================================
+add_library(p2ren::core ALIAS p2ren_core)

@@ -23,6 +23,7 @@ public:
 
     static Window*          GetWindow() { return s_Application->m_Window; }
     static ResourceManager* GetResourceManager() { return s_Application->m_ResourceManager; }
+    static std::string_view GetBasePath();
 
 private:
     /// Iterate over all directories and check if its the 'assets' folder, otherwise check the

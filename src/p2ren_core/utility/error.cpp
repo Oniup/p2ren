@@ -24,6 +24,7 @@ namespace intern {
         case ErrorSeverity::High: return fmt::fg(fmt::color::dark_red);
         case p2ren::ErrorSeverity::Fatal:
             return fmt::fg(fmt::color::dark_red) | fmt::emphasis::bold;
+        default: fmt::fg(fmt::color::white);
         }
     }
 
@@ -35,6 +36,7 @@ namespace intern {
         case ErrorSeverity::Medium: return "MEDIUM";
         case ErrorSeverity::High:   return "HIGH";
         case ErrorSeverity::Fatal:  return "FATAL";
+        default:                    return "UNKNOWN";
         }
     }
 

@@ -19,14 +19,14 @@ namespace intern {
     constexpr size_t ShaderTypeCount = 3;
 
     constexpr std::array<uint32_t, ShaderTypeCount> ShaderTypes = {
-        GL_FRAGMENT_SHADER,
         GL_VERTEX_SHADER,
+        GL_FRAGMENT_SHADER,
         GL_GEOMETRY_SHADER,
     };
 
     constexpr std::array<std::string_view, ShaderTypeCount> ShaderTypeNames = {
-        "Fragment",
         "Vertex",
+        "Fragment",
         "Geometry",
     };
 
@@ -137,7 +137,7 @@ void Shader::Bind()
     glUseProgram(m_ID);
 }
 
-bool Shader::Valid() const
+bool Shader::IsValid() const
 {
     return m_ID != 0;
 }
