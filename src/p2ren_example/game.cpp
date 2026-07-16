@@ -2,7 +2,7 @@
 
 namespace p2ren_example {
 
-void Game::AttachEntityDescriptors()
+void Game::AttachActorCreateInfos()
 {
 }
 

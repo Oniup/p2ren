@@ -51,15 +51,15 @@ Application::~Application()
     }
 }
 
-void Application::Initialize(const ApplicationCreateInfo& descriptor)
+void Application::Initialize(const ApplicationCreateInfo& create_info)
 {
     // Initialize resource manager
     m_ResourceManager = new ResourceManager(
-        descriptor.AssetDirectory.empty() ? FindAssetDirectory() : descriptor.AssetDirectory);
+        create_info.AssetDirectory.empty() ? FindAssetDirectory() : create_info.AssetDirectory);
 
     // Initialize window and backend contexts
-    m_Renderer = new ForwardRenderer(m_ResourceManager, descriptor.Renderer);
-    m_Window   = new Window(descriptor.Window);
+    m_Renderer = new ForwardRenderer(m_ResourceManager, create_info.Renderer);
+    m_Window   = new Window(create_info.Window);
 
     // Initialize forward renderer and RHI context
     m_Renderer->InitializeBackend(m_Window);

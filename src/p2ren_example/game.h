@@ -7,7 +7,7 @@ namespace p2ren_example {
 class Game : public p2ren::Application
 {
 public:
-    void AttachEntityDescriptors() override;
+    void AttachActorCreateInfos() override;
 };
 
 } // namespace p2ren_example

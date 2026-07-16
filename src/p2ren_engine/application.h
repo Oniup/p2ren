@@ -15,9 +15,9 @@ class Application
 public:
     Application();
     virtual ~Application();
-    void Initialize(const ApplicationCreateInfo& descriptor);
+    void Initialize(const ApplicationCreateInfo& create_info);
 
-    virtual void AttachEntityDescriptors() = 0;
+    virtual void AttachActorCreateInfos() = 0;
 
     void Run();
 

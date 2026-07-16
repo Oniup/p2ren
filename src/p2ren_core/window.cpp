@@ -113,9 +113,16 @@ Window::Window(const WindowCreateInfo& info)
                    width,
                    height);
 
-    // https://stackoverflow.com/a/61894291
-    SDL_ShowWindow(m_Window); // IDK why, this is required for window to be focused on creation
-    SDL_RaiseWindow(m_Window);
+    // Force the window to be focused when created
+    if ((flags & SDL_WINDOW_ALWAYS_ON_TOP) == 0)
+    {
+        SDL_SetWindowAlwaysOnTop(m_Window, true);
+
+        SDL_PumpEvents();
+        SDL_DelayNS(1000);
+
+        SDL_SetWindowAlwaysOnTop(m_Window, false);
+    }
 }
 
 Window::~Window()
