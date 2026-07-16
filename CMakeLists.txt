@@ -14,7 +14,6 @@ set(CMAKE_CXX_EXTENSIONS OFF) # For cross platform/compiler compatibility
 # ==============================================================================
 # Options
 option(P2REN_BUILD_EXAMPLE "Build example executable" ON)
-option(P2REN_SHADER_HOT_RELOAD "Allows for hot reloading shaders. Shaders will still their paths now" ON)
 
 # Build directory setup for when building example is enabled
 if (P2REN_BUILD_EXAMPLE)
@@ -29,22 +28,25 @@ endif(0)
 add_subdirectory(thirdparty SYSTEM) # Thirdparty
 
 # Modules
-add_subdirectory(src/p2ren_core)
+add_subdirectory(src/p2ren_core) # Load first
 add_subdirectory(src/p2ren_renderer)
-# add_subdirectory(src/p2ren_world) # Not started yet
+add_subdirectory(src/p2ren_world)
+add_subdirectory(src/p2ren_engine) # Load last
 
 # Main interface library
-add_library(p2ren INTERFACE)
-target_link_libraries(p2ren
-INTERFACE
-    p2ren::core
-    p2ren::renderer
-)
-target_include_directories(p2ren
-INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-add_library(p2ren::p2ren ALIAS p2ren)
+# add_library(p2ren INTERFACE)
+# target_link_libraries(p2ren
+# INTERFACE
+#     p2ren::engine
+#     p2ren::core
+#     p2ren::world
+#     p2ren::renderer
+# )
+# target_include_directories(p2ren
+# INTERFACE
+#     ${CMAKE_CURRENT_SOURCE_DIR}/src
+# )
+# add_library(p2ren::p2ren ALIAS p2ren)
 
 if (${P2REN_BUILD_EXAMPLE})
     add_subdirectory(src/p2ren_example)

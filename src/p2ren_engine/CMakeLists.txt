@@ -1,38 +1,33 @@
-# World
+# Engine
 # ==============================================================================
-add_library(p2ren_world STATIC)
-target_include_directories(p2ren_world
+add_library(p2ren_engine STATIC)
+target_include_directories(p2ren_engine
 PUBLIC
     ${CMAKE_SOURCE_DIR}/src
 )
 
-target_sources(p2ren_world
+target_sources(p2ren_engine
 PUBLIC
-    ./components/transform.h
-    ./component_registry.h
-    ./world.h
+    ./application.h
+    ./create_info.h
 PRIVATE
-    ./components/transform.cpp
-    ./component_registry.cpp
-    ./world.cpp
+    ./application.cpp
 )
 
 # Dependencies
 # ==============================================================================
-target_link_libraries(p2ren_world
+target_link_libraries(p2ren_engine
 PUBLIC
     p2ren::core
     p2ren::renderer
-
-    glm::glm
+    p2ren::world
 
 PRIVATE
-    SDL3::SDL3
-    SDL3_image::SDL3_image
-    glad
+    SDL3::SDL3 # TODO: Remove later
+    glad       # TODO: Remove later
 )
 
 # Alias for external linking
 # ==============================================================================
-add_library(p2ren::world ALIAS p2ren_world)
+add_library(p2ren::engine ALIAS p2ren_engine)
 

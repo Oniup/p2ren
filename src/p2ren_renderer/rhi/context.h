@@ -8,6 +8,8 @@ typedef struct SDL_GLContextState* SDL_GLContext;
 
 namespace p2ren {
 
+class Window;
+
 class RHIContext
 {
 public:
@@ -17,7 +19,7 @@ public:
     RHIContext(bool enable_hardware_debug_callback);
     ~RHIContext();
 
-    void InitializeBackend();
+    void InitializeBackend(Window* window);
     void Terminate();
 
     SDL_GLContext       GetInternalContext() { return m_InternalContext; }

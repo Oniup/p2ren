@@ -4,7 +4,10 @@ typedef struct SDL_GLContextState* SDL_GLContext;
 
 namespace p2ren {
 
-struct RendererDescriptor;
+class Window;
+class ResourceManager;
+
+struct RendererCreateInfo;
 class RHIContext;
 
 class ForwardRenderer
@@ -12,16 +15,18 @@ class ForwardRenderer
 public:
     static constexpr size_t ShaderPoolInitialCapacity = 20;
 
-    ForwardRenderer(const RendererDescriptor& descriptor);
+    ForwardRenderer(ResourceManager* resources_manager, const RendererCreateInfo& info);
     ~ForwardRenderer();
 
-    void InitializeBackend();
+    void InitializeBackend(Window* window);
     void InitializeResources();
 
     void SwapBuffers();
 
 private:
-    RHIContext* m_Context = nullptr;
+    Window*          m_Window          = nullptr;
+    ResourceManager* m_ResourceManager = nullptr;
+    RHIContext*      m_Context         = nullptr;
 };
 
 } // namespace p2ren

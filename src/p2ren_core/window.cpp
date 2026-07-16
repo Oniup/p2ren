@@ -60,69 +60,62 @@ WindowResolution Window::GetClosestResolutionSize(int32_t width)
     return closest;
 }
 
-Window::Window(const std::string& title, int32_t width, int32_t height, WindowFlags flags)
+Window::Window(const WindowCreateInfo& info)
 {
-    SDL_DisplayID          display_id    = SDL_GetPrimaryDisplay();
-    const SDL_DisplayMode* display_mode  = SDL_GetCurrentDisplayMode(display_id);
-    flags                               |= SDL_WINDOW_OPENGL;
-
-    if (width > display_mode->w || height > display_mode->h)
-    {
-        int32_t invalid_width  = width;
-        int32_t invalid_height = height;
-
-        width  = display_mode->w / 2;
-        height = display_mode->h / 2;
-
-        P2REN_WARN("Cannot set resolution size ({}, {}) as it exceeds monitor ({}, {}), using "
-                   "fallback size ({}, {})",
-                   invalid_width,
-                   invalid_height,
-                   display_mode->w,
-                   display_mode->h,
-                   width,
-                   height);
-    }
-
-    m_Window = SDL_CreateWindow(title.c_str(), width, height, flags);
-    if (!m_Window)
-        P2REN_FATAL("Failed to create SDL window: {}", SDL_GetError());
-
-    P2REN_INFO("Create window with resolution: {}, {}", width, height);
-    SDL_RaiseWindow(m_Window); // Focuses the window
-}
-
-Window::Window(const std::string& title, WindowResolution resolution, WindowFlags flags)
-{
-    SDL_DisplayID display_id  = SDL_GetPrimaryDisplay();
-    flags                    |= SDL_WINDOW_OPENGL;
-
+    SDL_DisplayID          display_id   = SDL_GetPrimaryDisplay();
     const SDL_DisplayMode* display_mode = SDL_GetCurrentDisplayMode(display_id);
-    if (resolution == WindowResolution::Auto)
-        resolution = Window::GetClosestResolutionSize(display_mode->w - display_mode->w / 3);
+    WindowFlags            flags        = info.Flags | SDL_WINDOW_OPENGL;
 
-    auto [width, height] = Window::GetResolutionSize(resolution);
-    if (width > display_mode->w)
+    int32_t          width      = info.Width;
+    int32_t          height     = info.Height;
+    WindowResolution resolution = info.Resolution;
+
+    // Custom resolution
+    if (info.Resolution == WindowResolution::Custom)
     {
-        width  = display_mode->w / 2;
-        height = display_mode->h / 2;
-        P2REN_WARN("Cannot set resolution size ({}) as it exceeds monitor ({}, {}), using fallback "
-                   "size ({}, {})",
-                   GetResolutionAsString(resolution),
-                   display_mode->w,
-                   display_mode->h,
-                   width,
-                   height);
+        bool out_upper_bounds = info.Width > display_mode->w || info.Height > display_mode->h;
+        bool out_lower_bounds = info.Width < 1 || info.Height < 0;
+        if (out_upper_bounds || out_lower_bounds)
+        {
+            width  = display_mode->w / 2;
+            height = display_mode->h / 2;
+
+            P2REN_WARN("Cannot set resolution size ({}, {}) as it exceeds monitor ({}, {}), using "
+                       "fallback size ({}, {})",
+                       info.Width,
+                       info.Height,
+                       display_mode->w,
+                       display_mode->h,
+                       width,
+                       height);
+        }
+    }
+    else // Not custom resolution, uses the enum to set the size
+    {
+        // Find closest resolution monitor
+        if (resolution == WindowResolution::Auto)
+            resolution = Window::GetClosestResolutionSize(display_mode->w - display_mode->w / 3);
+
+        auto size = Window::GetResolutionSize(resolution);
+        width     = std::get<0>(size);
+        height    = std::get<1>(size);
     }
 
-    m_Window = SDL_CreateWindow(title.c_str(), width, height, flags);
+    m_Window = SDL_CreateWindow(info.Title.c_str(), width, height, flags);
     if (!m_Window)
         P2REN_FATAL("Failed to create SDL window: {}", SDL_GetError());
 
-    P2REN_INFO("Create window with resolution: {}, actual resolution: ({}, {})",
-               GetResolutionAsString(resolution),
-               width,
-               height);
+    if (info.Resolution == WindowResolution::Custom)
+        P2REN_INFO("Create window with resolution: {}, {}", width, height);
+    else
+        P2REN_INFO("Create window with resolution: {}, actual resolution: ({}, {})",
+                   GetResolutionAsString(resolution),
+                   width,
+                   height);
+
+    // https://stackoverflow.com/a/61894291
+    SDL_ShowWindow(m_Window); // IDK why, this is required for window to be focused on creation
+    SDL_RaiseWindow(m_Window);
 }
 
 Window::~Window()

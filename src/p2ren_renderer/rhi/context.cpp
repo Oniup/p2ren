@@ -4,7 +4,6 @@
 #include <SDL3/SDL_video.h>
 #include <glad/gl.h>
 
-#include "p2ren_core/application.h"
 #include "p2ren_core/utility/error.h"
 #include "p2ren_core/window.h"
 #include "p2ren_renderer/draw_modes.h"
@@ -104,10 +103,9 @@ RHIContext::~RHIContext()
     Terminate();
 }
 
-void RHIContext::InitializeBackend()
+void RHIContext::InitializeBackend(Window* window)
 {
-    SDL_Window* window = Application::GetWindow()->GetInternalContext();
-    m_InternalContext  = SDL_GL_CreateContext(window);
+    m_InternalContext = SDL_GL_CreateContext(window->GetInternalContext());
     if (!m_InternalContext)
         P2REN_FATAL("Failed to initialize OpenGL context: {}", SDL_GetError());
 

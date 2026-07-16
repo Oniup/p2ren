@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "p2ren_core/application_descriptor.h"
+#include "p2ren_engine/create_info.h"
 
 namespace p2ren {
 
@@ -15,7 +15,7 @@ class Application
 public:
     Application();
     virtual ~Application();
-    void Initialize(const ApplicationDescriptor& descriptor);
+    void Initialize(const ApplicationCreateInfo& descriptor);
 
     virtual void AttachEntityDescriptors() = 0;
 

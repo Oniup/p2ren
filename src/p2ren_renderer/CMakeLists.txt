@@ -15,6 +15,7 @@ PUBLIC
     ./rhi/context.h
     ./rhi/shader.h
     ./rhi/texture.h
+    ./create_info.h
     ./draw_modes.h
     ./forward_renderer.h
 PRIVATE
@@ -26,7 +27,6 @@ PRIVATE
     ./rhi/shader.cpp
     ./rhi/texture.cpp
     ./forward_renderer.cpp
-
 )
 
 target_compile_definitions(p2ren_renderer
@@ -38,7 +38,7 @@ PRIVATE
 # ==============================================================================
 target_link_libraries(p2ren_renderer
 PUBLIC
-    p2ren_core
+    p2ren::core
     glm::glm
 
 PRIVATE

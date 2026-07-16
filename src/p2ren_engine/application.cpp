@@ -1,5 +1,6 @@
-#include "p2ren_core/application.h"
+#include "p2ren_engine/application.h"
 
+// TODO: SDL and glad should be removed later
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <fmt/base.h>
@@ -12,11 +13,11 @@
 #include <string_view>
 
 #include "p2ren_core/resource_manager.h"
-#include "p2ren_core/transform.h"
 #include "p2ren_core/window.h"
 #include "p2ren_renderer/forward_renderer.h"
 #include "p2ren_renderer/resources/mesh.h"
 #include "p2ren_renderer/rhi/shader.h"
+#include "p2ren_world/components/transform.h"
 
 namespace p2ren {
 
@@ -41,38 +42,27 @@ Application::~Application()
 {
     if (m_Renderer)
     {
+        delete m_ResourceManager;
         delete m_Renderer;
         delete m_Window;
-        delete m_ResourceManager;
+        m_ResourceManager = nullptr;
         m_Renderer        = nullptr;
         m_Window          = nullptr;
-        m_ResourceManager = nullptr;
     }
 }
 
-void Application::Initialize(const ApplicationDescriptor& descriptor)
+void Application::Initialize(const ApplicationCreateInfo& descriptor)
 {
     // Initialize resource manager
     m_ResourceManager = new ResourceManager(
         descriptor.AssetDirectory.empty() ? FindAssetDirectory() : descriptor.AssetDirectory);
 
-    // Initialize window
-    m_Renderer = new ForwardRenderer(descriptor.Renderer);
-    if (descriptor.Window.Resolution == WindowResolution::Custom)
-    {
-        m_Window = new Window(descriptor.Window.Title,
-                              descriptor.Window.Width,
-                              descriptor.Window.Height,
-                              descriptor.Window.Flags);
-    }
-    else
-    {
-        m_Window = new Window(
-            descriptor.Window.Title, descriptor.Window.Resolution, descriptor.Window.Flags);
-    }
+    // Initialize window and backend contexts
+    m_Renderer = new ForwardRenderer(m_ResourceManager, descriptor.Renderer);
+    m_Window   = new Window(descriptor.Window);
 
-    // Initialize forward renderer
-    m_Renderer->InitializeBackend();
+    // Initialize forward renderer and RHI context
+    m_Renderer->InitializeBackend(m_Window);
     m_Renderer->InitializeResources();
 }
 
@@ -107,8 +97,6 @@ void Application::Run()
     Mesh           mesh        = Mesh::GeneratePlane(Material{}, glm::vec3(0.0f, 0.0f, -0.0f));
     Transform      transform   = Transform{.Position = glm::vec3(0.0f)};
     ResourceHandle flat_shader = m_ResourceManager->QueryHandle<Shader>("Flat Color");
-
-    Buffer ubo_matrices(Buffer::Uniform);
 
     SDL_Event event;
     while (m_Window->IsOpen())

@@ -9,8 +9,8 @@ namespace p2ren {
 
 enum class WindowResolution
 {
-    Auto,
     Custom,
+    Auto,
     NHD,
     HD,
     FullHD,
@@ -45,6 +45,15 @@ enum WindowFlags_ : uint64_t
 
 using WindowFlags = uint64_t;
 
+struct WindowCreateInfo
+{
+    std::string      Title      = "P2 Ren"; // Window display title
+    int32_t          Width      = 800;      // Set Resolution to Custom to manually set size
+    int32_t          Height     = 800;      // Set Resolution to Custom to manually set size
+    WindowResolution Resolution = WindowResolution::Custom; // Set size based on this
+    WindowFlags      Flags      = WindowFlags_Resizable;    // Window properties
+};
+
 class Window
 {
 public:
@@ -53,8 +62,7 @@ public:
     static WindowResolution             GetClosestResolutionSize(int32_t width);
 
     Window() = default;
-    Window(const std::string& title, int32_t width, int32_t height, WindowFlags flags);
-    Window(const std::string& title, WindowResolution resolution, WindowFlags flags);
+    Window(const WindowCreateInfo& info);
     ~Window();
 
     Window(Window&& other);

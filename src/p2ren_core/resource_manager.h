@@ -30,7 +30,7 @@ protected:
 };
 
 template <typename T>
-class ResourcePool final : public IResourcePool
+class ResourcePool : public IResourcePool
 {
 public:
     ResourcePool()           = default;

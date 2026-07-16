@@ -4,18 +4,18 @@
 #include <SDL3/SDL_video.h>
 #include <glad/gl.h>
 
-#include "p2ren_core/application.h"
-#include "p2ren_core/application_descriptor.h"
 #include "p2ren_core/resource_manager.h"
 #include "p2ren_core/window.h"
+#include "p2ren_renderer/create_info.h"
 #include "p2ren_renderer/rhi/context.h"
 #include "p2ren_renderer/rhi/shader.h"
 
 namespace p2ren {
 
-ForwardRenderer::ForwardRenderer(const RendererDescriptor& descriptor)
+ForwardRenderer::ForwardRenderer(ResourceManager* resources_manager, const RendererCreateInfo& info)
+    : m_ResourceManager(resources_manager),
+      m_Context(new RHIContext(info.EnableOpenGLDebugCallback)) // SDL and OpenGL Attributes
 {
-    m_Context = new RHIContext(descriptor.EnableOpenGLDebugCallback); // SDL and OpenGL Attributes
 }
 
 ForwardRenderer::~ForwardRenderer()
@@ -27,28 +27,27 @@ ForwardRenderer::~ForwardRenderer()
     }
 }
 
-void ForwardRenderer::InitializeBackend()
+void ForwardRenderer::InitializeBackend(Window* window)
 {
-    m_Context->InitializeBackend();
+    m_Window = window;
+    m_Context->InitializeBackend(window);
 }
 
 void ForwardRenderer::InitializeResources()
 {
-    ResourceManager* resources = Application::GetResourceManager();
-
     // Initialize pools
-    resources->InitializePool<Shader>(ShaderPoolInitialCapacity);
+    m_ResourceManager->InitializePool<Shader>(ShaderPoolInitialCapacity);
 
     // Initialize default resources
-    resources->PushResource<Shader>("Flat Color",
-                                    Shader(resources->GetAssetPath("shaders/base.vert"),
-                                           resources->GetAssetPath("shaders/flat_color.frag")));
+    m_ResourceManager->PushResource<Shader>(
+        "Flat Color",
+        Shader(m_ResourceManager->GetAssetPath("shaders/base.vert"),
+               m_ResourceManager->GetAssetPath("shaders/flat_color.frag")));
 }
 
 void ForwardRenderer::SwapBuffers()
 {
-    SDL_Window* window = Application::GetWindow()->GetInternalContext();
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(m_Window->GetInternalContext());
 }
 
 } // namespace p2ren
