@@ -6,19 +6,20 @@
 #include <vector>
 
 #include "p2ren_core/utility/error.h"
+#include "p2ren_renderer/rhi/context.h"
 
 namespace p2ren {
 namespace intern {
 
-    int32_t ConvertDataTypeToOpenGL(ShaderVertexDataType type)
+    int32_t ConvertDataTypeToOpenGL(VertexAttribute::DataType type)
     {
-        if (type != ShaderVertexDataType::Invalid)
+        if (type != VertexAttribute::Invalid)
         {
-            if (type >= ShaderVertexDataType::Float)
+            if (type >= VertexAttribute::Float)
                 return GL_FLOAT;
-            else if (type >= ShaderVertexDataType::UInt)
+            else if (type >= VertexAttribute::UInt)
                 return GL_UNSIGNED_INT;
-            else if (type >= ShaderVertexDataType::Int)
+            else if (type >= VertexAttribute::Int)
                 return GL_INT;
         }
         return GL_INVALID_ENUM;
@@ -66,29 +67,29 @@ namespace intern {
 
 } // namespace intern
 
-std::string_view Buffer::ConvertTypeToString(BufferType type)
+std::string_view Buffer::ConvertTypeToString(Type type)
 {
     switch (type)
     {
-    case BufferType::Array:   return "Array";
-    case BufferType::Element: return "Element";
-    case BufferType::Uniform: return "Uniform";
-    default:                  return "Invalid";
+    case Buffer::Array:   return "Array";
+    case Buffer::Element: return "Element";
+    case Buffer::Uniform: return "Uniform";
+    default:              return "Invalid";
     }
 }
 
-int32_t Buffer::ConvertBufferTypeToRHI(BufferType type)
+int32_t Buffer::ConvertTypeToRHI(Type type)
 {
     switch (type)
     {
-    case BufferType::Array:   return GL_ARRAY_BUFFER;
-    case BufferType::Element: return GL_ELEMENT_ARRAY_BUFFER;
-    case BufferType::Uniform: return GL_UNIFORM_BUFFER;
-    default:                  return std::numeric_limits<int32_t>::max();
+    case Buffer::Array:   return GL_ARRAY_BUFFER;
+    case Buffer::Element: return GL_ELEMENT_ARRAY_BUFFER;
+    case Buffer::Uniform: return GL_UNIFORM_BUFFER;
+    default:              return std::numeric_limits<int32_t>::max();
     }
 }
 
-Buffer::Buffer(BufferType type, bool is_dynamic)
+Buffer::Buffer(Type type, bool is_dynamic)
     : m_Type(type),
       m_IsDynamic(is_dynamic)
 {
@@ -100,51 +101,51 @@ Buffer::~Buffer()
     if (m_ID != 0)
     {
         glDeleteBuffers(1, &m_ID);
-        m_Type          = BufferType::Invalid;
-        m_AllocatedSize = 0;
-        m_ID            = 0;
+        m_Type = Buffer::Invalid;
+        m_Size = 0;
+        m_ID   = 0;
     }
 }
 
 Buffer::Buffer(Buffer&& other)
     : m_Type(other.m_Type),
       m_ID(other.m_ID),
-      m_AllocatedSize(other.m_AllocatedSize),
+      m_Size(other.m_Size),
       m_IsDynamic(other.m_IsDynamic)
 {
-    other.m_Type          = BufferType::Invalid;
-    other.m_ID            = 0;
-    other.m_AllocatedSize = 0;
-    other.m_IsDynamic     = false;
+    other.m_Type      = Type::Invalid;
+    other.m_ID        = 0;
+    other.m_Size      = 0;
+    other.m_IsDynamic = false;
 }
 
 Buffer& Buffer::operator=(Buffer&& other)
 {
-    if (m_ID == other.m_ID)
+    if (this != &other)
     {
         if (m_ID != 0)
             glDeleteBuffers(1, &m_ID);
 
-        m_Type          = other.m_Type;
-        m_ID            = other.m_ID;
-        m_AllocatedSize = other.m_AllocatedSize;
-        m_IsDynamic     = other.m_IsDynamic;
+        m_Type      = other.m_Type;
+        m_ID        = other.m_ID;
+        m_Size      = other.m_Size;
+        m_IsDynamic = other.m_IsDynamic;
 
-        other.m_Type          = BufferType::Invalid;
-        other.m_ID            = 0;
-        other.m_AllocatedSize = 0;
-        other.m_IsDynamic     = false;
+        other.m_Type      = Type::Invalid;
+        other.m_ID        = 0;
+        other.m_Size      = 0;
+        other.m_IsDynamic = false;
     }
     return *this;
 }
 
 void Buffer::Bind(uint32_t binding_index)
 {
-    if (m_Type == BufferType::Uniform)
+    if (m_Type == Type::Uniform)
         glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, m_ID);
     else
     {
-        int32_t type = ConvertBufferTypeToRHI(m_Type);
+        int32_t type = ConvertTypeToRHI(m_Type);
         glBindBuffer(type, m_ID);
     }
 }
@@ -154,21 +155,22 @@ bool Buffer::IsValid() const
     return m_ID != 0;
 }
 
-void Buffer::PushData(const void* data, size_t size)
+void Buffer::PushData(const void* data, size_t stride_size, size_t size)
 {
-    int32_t type = ConvertBufferTypeToRHI(m_Type);
+    int32_t type = ConvertTypeToRHI(m_Type);
     glBindBuffer(type, m_ID);
-    glBufferData(type, size, data, m_IsDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
-    m_AllocatedSize = size;
+    glBufferData(type, stride_size * size, data, m_IsDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+    m_Size          = size;
+    m_AllocatedSize = stride_size * size;
 }
 
-bool Buffer::PushSubData(const void* data, size_t size, size_t offset)
+bool Buffer::PushSubData(const void* data, size_t stride_size, size_t size, size_t offset)
 {
-    if (size + offset < m_AllocatedSize)
+    if (size + offset < m_Size)
     {
-        int32_t type = ConvertBufferTypeToRHI(m_Type);
+        int32_t type = ConvertTypeToRHI(m_Type);
         glBindBuffer(type, m_ID);
-        glBufferSubData(type, offset, size, data);
+        glBufferSubData(type, offset, stride_size * size, data);
         return true;
     }
 
@@ -177,13 +179,13 @@ bool Buffer::PushSubData(const void* data, size_t size, size_t offset)
                 ConvertTypeToString(m_Type),
                 size,
                 offset,
-                size + offset,
-                m_AllocatedSize);
+                stride_size * size + offset,
+                m_Size);
 
     return false;
 }
 
-VertexAttribute::VertexAttribute(size_t buffer_index, ShaderVertexDataType type, size_t instance,
+VertexAttribute::VertexAttribute(size_t buffer_index, DataType type, size_t instance,
                                  bool normalized)
     : Type(type),
       BufferIndex(buffer_index),
@@ -196,22 +198,22 @@ size_t VertexAttribute::GetShaderTypeByteSize() const
 {
     switch (Type)
     {
-    case ShaderVertexDataType::Int:   return 1 * sizeof(int);
-    case ShaderVertexDataType::IVec2: return 2 * sizeof(int);
-    case ShaderVertexDataType::IVec3: return 3 * sizeof(int);
-    case ShaderVertexDataType::IVec4: return 4 * sizeof(int);
-    case ShaderVertexDataType::UInt:  return 1 * sizeof(float);
-    case ShaderVertexDataType::UVec2: return 2 * sizeof(float);
-    case ShaderVertexDataType::UVec3: return 3 * sizeof(float);
-    case ShaderVertexDataType::UVec4: return 4 * sizeof(float);
-    case ShaderVertexDataType::Float: return 1 * sizeof(float);
-    case ShaderVertexDataType::Vec2:  return 2 * sizeof(float);
-    case ShaderVertexDataType::Vec3:  return 3 * sizeof(float);
-    case ShaderVertexDataType::Vec4:  return 4 * sizeof(float);
-    case ShaderVertexDataType::Mat2:  return 2 * 2 * sizeof(float);
-    case ShaderVertexDataType::Mat3:  return 3 * 3 * sizeof(float);
-    case ShaderVertexDataType::Mat4:  return 4 * 4 * sizeof(float);
-    default:                          return 0;
+    case VertexAttribute::Int:   return 1 * sizeof(int);
+    case VertexAttribute::IVec2: return 2 * sizeof(int);
+    case VertexAttribute::IVec3: return 3 * sizeof(int);
+    case VertexAttribute::IVec4: return 4 * sizeof(int);
+    case VertexAttribute::UInt:  return 1 * sizeof(float);
+    case VertexAttribute::UVec2: return 2 * sizeof(float);
+    case VertexAttribute::UVec3: return 3 * sizeof(float);
+    case VertexAttribute::UVec4: return 4 * sizeof(float);
+    case VertexAttribute::Float: return 1 * sizeof(float);
+    case VertexAttribute::Vec2:  return 2 * sizeof(float);
+    case VertexAttribute::Vec3:  return 3 * sizeof(float);
+    case VertexAttribute::Vec4:  return 4 * sizeof(float);
+    case VertexAttribute::Mat2:  return 2 * 2 * sizeof(float);
+    case VertexAttribute::Mat3:  return 3 * 3 * sizeof(float);
+    case VertexAttribute::Mat4:  return 4 * 4 * sizeof(float);
+    default:                     return 0;
     }
 }
 
@@ -219,22 +221,22 @@ size_t VertexAttribute::GetShaderTypeElementSize() const
 {
     switch (Type)
     {
-    case ShaderVertexDataType::Int:   return 1;
-    case ShaderVertexDataType::IVec2: return 2;
-    case ShaderVertexDataType::IVec3: return 3;
-    case ShaderVertexDataType::IVec4: return 4;
-    case ShaderVertexDataType::UInt:  return 1;
-    case ShaderVertexDataType::UVec2: return 2;
-    case ShaderVertexDataType::UVec3: return 3;
-    case ShaderVertexDataType::UVec4: return 4;
-    case ShaderVertexDataType::Float: return 1;
-    case ShaderVertexDataType::Vec2:  return 2;
-    case ShaderVertexDataType::Vec3:  return 3;
-    case ShaderVertexDataType::Vec4:  return 4;
-    case ShaderVertexDataType::Mat2:  return 2; // For Matrices, this represent row/column size
-    case ShaderVertexDataType::Mat3:  return 3;
-    case ShaderVertexDataType::Mat4:  return 4;
-    default:                          return 0;
+    case VertexAttribute::Int:   return 1;
+    case VertexAttribute::IVec2: return 2;
+    case VertexAttribute::IVec3: return 3;
+    case VertexAttribute::IVec4: return 4;
+    case VertexAttribute::UInt:  return 1;
+    case VertexAttribute::UVec2: return 2;
+    case VertexAttribute::UVec3: return 3;
+    case VertexAttribute::UVec4: return 4;
+    case VertexAttribute::Float: return 1;
+    case VertexAttribute::Vec2:  return 2;
+    case VertexAttribute::Vec3:  return 3;
+    case VertexAttribute::Vec4:  return 4;
+    case VertexAttribute::Mat2:  return 2; // For Matrices, this represent row/column size
+    case VertexAttribute::Mat3:  return 3;
+    case VertexAttribute::Mat4:  return 4;
+    default:                     return 0;
     }
 }
 
@@ -286,7 +288,7 @@ VertexArray::VertexArray(VertexArray&& other)
 
 VertexArray& VertexArray::operator=(VertexArray&& other)
 {
-    if (m_ID != other.m_ID)
+    if (this != &other)
     {
         if (m_ID != 0)
             glDeleteVertexArrays(1, &m_ID);
@@ -294,13 +296,60 @@ VertexArray& VertexArray::operator=(VertexArray&& other)
         m_ID            = other.m_ID;
         m_ArrayBuffers  = std::move(other.m_ArrayBuffers);
         m_ElementBuffer = std::move(other.m_ElementBuffer);
+
+        other.m_ID = 0;
     }
     return *this;
 }
 
-void VertexArray::Bind()
+void VertexArray::Bind() const
 {
     glBindVertexArray(m_ID);
+}
+
+void VertexArray::Draw(PrimitiveMode mode, uint32_t offset, uint32_t size) const
+{
+    int32_t gl_primitive = RHIContext::ConvertPrimitiveModeToRHI(mode);
+
+    glBindVertexArray(m_ID);
+    if (m_ElementBuffer.IsValid())
+    {
+        size = size == 0 ? m_ElementBuffer.GetSize() : size;
+        P2REN_ASSERT(size <= m_ElementBuffer.GetSize(),
+                     "Size cannot exceed the element buffers size {}",
+                     size,
+                     m_ElementBuffer.GetSize());
+        P2REN_ASSERT(offset <= size, "Offset {} cannot exceed the size {}", offset, size);
+        glDrawElements(gl_primitive,
+                       size,
+                       GL_UNSIGNED_INT,
+                       reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+    }
+    else
+    {
+        if (size == 0)
+        {
+            size_t size = 0;
+            for (const Buffer& buffer : m_ArrayBuffers)
+                size += buffer.GetSize();
+        }
+#ifndef NDEBUG
+        else
+        {
+            size_t total_size = 0;
+            for (const Buffer& buffer : m_ArrayBuffers)
+                total_size += buffer.GetSize();
+            P2REN_ASSERT(size <= total_size,
+                         "Size cannot exceed the collective array buffers ({} total) size {}",
+                         size,
+                         m_ArrayBuffers.size(),
+                         total_size);
+        }
+#endif
+
+        P2REN_ASSERT(offset >= size, "Offset {} cannot exceed the size {}", offset, size);
+        glDrawArrays(gl_primitive, offset, size);
+    }
 }
 
 bool VertexArray::IsValid() const
@@ -345,7 +394,7 @@ void VertexArray::InitializeAttributes(const VertexAttribute* attributes, size_t
 
         // Enable attribute
         size_t element_size = attrib.GetShaderTypeElementSize();
-        if (attrib.Type < ShaderVertexDataType::Mat2)
+        if (attrib.Type < VertexAttribute::Mat2)
             info.EnableAttribute(attrib, element_size);
         else
         {

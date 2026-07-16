@@ -7,6 +7,7 @@
 #include "p2ren_core/application.h"
 #include "p2ren_core/utility/error.h"
 #include "p2ren_core/window.h"
+#include "p2ren_renderer/draw_modes.h"
 
 namespace p2ren {
 
@@ -51,6 +52,32 @@ void GLAPIENTRY glDebugOutputCallback(GLenum source, GLenum type, unsigned int i
     case GL_DEBUG_SEVERITY_MEDIUM:       P2REN_ERROR(EFMT, id, source_str, type_str, message); break;
     case GL_DEBUG_SEVERITY_LOW:          P2REN_WARN(EFMT, id, source_str, type_str, message); break;
     case GL_DEBUG_SEVERITY_NOTIFICATION: P2REN_INFO(EFMT, id, source_str, type_str, message); break;
+    }
+}
+
+int32_t RHIContext::ConvertPolygonModeToRHI(PolygonMode mode)
+{
+    switch (mode)
+    {
+    case PolygonMode::FillFrontAndBack: return GL_FRONT_AND_BACK;
+    case PolygonMode::FillFront:        return GL_FRONT;
+    case PolygonMode::FillBack:         return GL_BACK;
+    case PolygonMode::Lines:            return GL_LINE;
+    }
+}
+
+int32_t RHIContext::ConvertPrimitiveModeToRHI(PrimitiveMode mode)
+{
+    switch (mode)
+    {
+    case PrimitiveMode::Points:        return GL_POINTS;
+    case PrimitiveMode::Lines:         return GL_LINE;
+    case PrimitiveMode::LineStrip:     return GL_LINE_STRIP;
+    case PrimitiveMode::LineLoop:      return GL_LINE_LOOP;
+    case PrimitiveMode::Triangles:     return GL_TRIANGLES;
+    case PrimitiveMode::TriangleStrip: return GL_TRIANGLE_STRIP;
+    case PrimitiveMode::TriangleFan:   return GL_TRIANGLE_FAN;
+    case PrimitiveMode::Patches:       return GL_PATCHES;
     }
 }
 

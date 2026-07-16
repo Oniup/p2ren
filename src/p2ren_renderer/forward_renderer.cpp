@@ -40,7 +40,7 @@ void ForwardRenderer::InitializeResources()
     resources->InitializePool<Shader>(ShaderPoolInitialCapacity);
 
     // Initialize default resources
-    resources->PushResource<Shader>("Flat Color shader",
+    resources->PushResource<Shader>("Flat Color",
                                     Shader(resources->GetAssetPath("shaders/base.vert"),
                                            resources->GetAssetPath("shaders/flat_color.frag")));
 }

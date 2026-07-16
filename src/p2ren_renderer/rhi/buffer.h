@@ -5,24 +5,28 @@
 #include <string_view>
 #include <vector>
 
-namespace p2ren {
+#include "p2ren_renderer/draw_modes.h"
 
-enum class BufferType
-{
-    Invalid,
-    Array,
-    Element,
-    Uniform,
-};
+namespace p2ren {
 
 class Buffer
 {
 public:
-    static std::string_view ConvertTypeToString(BufferType type);
-    static int32_t          ConvertBufferTypeToRHI(BufferType type);
+    enum class Type
+    {
+        Invalid,
+        Array,
+        Element,
+        Uniform,
+    };
+
+    using enum Type;
+
+    static std::string_view ConvertTypeToString(Type type);
+    static int32_t          ConvertTypeToRHI(Type type);
 
     Buffer() = default;
-    Buffer(BufferType type, bool is_dynamic = false);
+    Buffer(Type type, bool is_dynamic = false);
     ~Buffer();
 
     Buffer(Buffer&& other);
@@ -34,49 +38,52 @@ public:
     void Bind(uint32_t binding_index = 0);
     bool IsValid() const;
 
-    BufferType GetType() const { return m_Type; }
-    uint32_t   GetID() const { return m_ID; }
-    size_t     GetAllocatedSize() const { return m_AllocatedSize; }
-    bool       IsDynamic() const { return m_IsDynamic; }
+    Type     GetType() const { return m_Type; }
+    uint32_t GetID() const { return m_ID; }
+    size_t   GetSize() const { return m_Size; }
+    size_t   GetAllocatedSize() const { return m_AllocatedSize; }
+    bool     IsDynamic() const { return m_IsDynamic; }
 
-    void PushData(const void* data, size_t size);
-    bool PushSubData(const void* data, size_t size, size_t offset);
+    void PushData(const void* data, size_t stride_size, size_t size);
+    bool PushSubData(const void* data, size_t stride_size, size_t size, size_t offset);
 
 private:
-    BufferType m_Type          = BufferType::Invalid;
-    uint32_t   m_ID            = 0;
-    size_t     m_AllocatedSize = 0;
-    bool       m_IsDynamic     = false;
-};
-
-enum class ShaderVertexDataType
-{
-    Invalid,
-    Int,
-    IVec2,
-    IVec3,
-    IVec4,
-    UInt,
-    UVec2,
-    UVec3,
-    UVec4,
-    Float,
-    Vec2,
-    Vec3,
-    Vec4,
-    Mat2,
-    Mat3,
-    Mat4,
+    Type     m_Type          = Type::Invalid;
+    uint32_t m_ID            = 0;
+    size_t   m_Size          = 0;
+    size_t   m_AllocatedSize = 0;
+    bool     m_IsDynamic     = false;
 };
 
 struct VertexAttribute
 {
-    ShaderVertexDataType Type        = ShaderVertexDataType::Float;
-    size_t               BufferIndex = 0;     // Target buffer index who's data to read
-    size_t               Instance    = 0;     // if > 0 then sets glVertexAttribDivisor(i, Instance)
-    bool                 Normalized  = false; // If data entry is normalized or not
+    enum class DataType
+    {
+        Invalid,
+        Int,
+        IVec2,
+        IVec3,
+        IVec4,
+        UInt,
+        UVec2,
+        UVec3,
+        UVec4,
+        Float,
+        Vec2,
+        Vec3,
+        Vec4,
+        Mat2,
+        Mat3,
+        Mat4,
+    };
+    using enum DataType;
 
-    VertexAttribute(size_t buffer_index, ShaderVertexDataType type, size_t instance = 0,
+    DataType Type        = VertexAttribute::Float;
+    size_t   BufferIndex = 0;     // Target buffer index who's data to read
+    size_t   Instance    = 0;     // if > 0 then sets glVertexAttribDivisor(i, Instance)
+    bool     Normalized  = false; // If data entry is normalized or not
+
+    VertexAttribute(size_t buffer_index, DataType type, size_t instance = 0,
                     bool normalized = false);
 
     size_t GetShaderTypeByteSize() const;
@@ -115,8 +122,11 @@ public:
     VertexArray(const VertexArray& other)            = delete;
     VertexArray& operator=(const VertexArray& other) = delete;
 
-    void Bind();
     bool IsValid() const;
+
+    void Bind() const;
+    void Draw(PrimitiveMode mode = PrimitiveMode::Triangles, uint32_t offset = 0,
+              uint32_t size = 0) const;
 
     std::vector<Buffer>& GetArrayBuffers() { return m_ArrayBuffers; }
     Buffer&              GetElementBuffer() { return m_ElementBuffer; }

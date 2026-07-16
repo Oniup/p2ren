@@ -3,7 +3,6 @@
 #include <string>
 
 #include "p2ren_core/application_descriptor.h"
-#include "p2ren_renderer/rhi/buffer.h"
 
 namespace p2ren {
 
@@ -36,7 +35,6 @@ private:
     ForwardRenderer* m_Renderer        = nullptr;
     Window*          m_Window          = nullptr;
     ResourceManager* m_ResourceManager = nullptr;
-    VertexArray      m_Test;
 };
 
 } // namespace p2ren

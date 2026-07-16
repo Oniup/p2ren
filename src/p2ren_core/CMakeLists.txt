@@ -16,11 +16,13 @@ PUBLIC
     ./application_descriptor.h
     ./resource_handle.h
     ./resource_manager.h
+    ./transform.h
     ./window.h
 PRIVATE
     ./utility/color.cpp
     ./utility/error.cpp
     ./application.cpp
+    ./transform.cpp
     ./window.cpp
 )
 
@@ -42,6 +44,7 @@ PUBLIC
     unordered_dense::unordered_dense
 PRIVATE
     SDL3::SDL3
+    glad # TODO: Remove later
 )
 
 # Alias for external linking

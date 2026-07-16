@@ -170,7 +170,7 @@ public:
     }
 
     template <typename T>
-    bool ContainsPool()
+    bool ContainsPool() const
     {
         return m_ResourcePools.contains(TypeInfo<T>::GetUUID());
     }

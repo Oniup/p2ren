@@ -15,6 +15,7 @@ PUBLIC
     ./rhi/context.h
     ./rhi/shader.h
     ./rhi/texture.h
+    ./draw_modes.h
     ./forward_renderer.h
 PRIVATE
     ./resources/material.cpp

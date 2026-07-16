@@ -26,23 +26,26 @@ public:
     Shader(const Shader& other)            = delete;
     Shader& operator=(const Shader& other) = delete;
 
-    void     Bind();
-    bool     IsValid() const;
+    bool IsValid() const;
+
+    void     Bind() const;
     uint32_t GetID() const { return m_ID; }
 
-    void PushConstant(std::string_view location, int32_t val);
-    void PushConstant(std::string_view location, uint32_t val);
-    void PushConstant(std::string_view location, float val);
+    void PushConstant(std::string_view location, int32_t val) const;
+    void PushConstant(std::string_view location, uint32_t val) const;
+    void PushConstant(std::string_view location, float val) const;
 
-    void PushConstant(std::string_view location, const glm::vec2& val);
-    void PushConstant(std::string_view location, const glm::vec3& val);
-    void PushConstant(std::string_view location, const glm::vec4& val);
+    void PushConstant(std::string_view location, const glm::vec2& val) const;
+    void PushConstant(std::string_view location, const glm::vec3& val) const;
+    void PushConstant(std::string_view location, const glm::vec4& val) const;
 
-    void PushConstant(std::string_view location, const glm::mat3& val);
-    void PushConstant(std::string_view location, const glm::mat4& val);
+    void PushConstant(std::string_view location, const glm::mat3& val,
+                      bool transpose = false) const;
+    void PushConstant(std::string_view location, const glm::mat4& val,
+                      bool transpose = false) const;
 
 private:
-    uint32_t GetUniformLocation(std::string_view location);
+    uint32_t GetUniformLocation(std::string_view location) const;
 
     uint32_t m_ID = 0;
 };

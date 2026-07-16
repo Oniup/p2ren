@@ -140,7 +140,7 @@ Shader::Shader(Shader&& other)
 
 Shader& Shader::operator=(Shader&& other)
 {
-    if (m_ID == other.m_ID)
+    if (this != &other)
     {
         if (m_ID != 0)
             glDeleteProgram(m_ID);
@@ -151,57 +151,57 @@ Shader& Shader::operator=(Shader&& other)
     return *this;
 }
 
-void Shader::Bind()
-{
-    glUseProgram(m_ID);
-}
-
 bool Shader::IsValid() const
 {
     return m_ID != 0;
 }
 
-void Shader::PushConstant(std::string_view location, int32_t val)
+void Shader::Bind() const
+{
+    glUseProgram(m_ID);
+}
+
+void Shader::PushConstant(std::string_view location, int32_t val) const
 {
     glUniform1i(GetUniformLocation(location), val);
 }
 
-void Shader::PushConstant(std::string_view location, uint32_t val)
+void Shader::PushConstant(std::string_view location, uint32_t val) const
 {
     glUniform1ui(GetUniformLocation(location), val);
 }
 
-void Shader::PushConstant(std::string_view location, float val)
+void Shader::PushConstant(std::string_view location, float val) const
 {
     glUniform1f(GetUniformLocation(location), val);
 }
 
-void Shader::PushConstant(std::string_view location, const glm::vec2& val)
+void Shader::PushConstant(std::string_view location, const glm::vec2& val) const
 {
     glUniform2fv(GetUniformLocation(location), 1, &val[0]);
 }
 
-void Shader::PushConstant(std::string_view location, const glm::vec3& val)
+void Shader::PushConstant(std::string_view location, const glm::vec3& val) const
 {
     glUniform3fv(GetUniformLocation(location), 1, &val[0]);
 }
 
-void Shader::PushConstant(std::string_view location, const glm::vec4& val)
+void Shader::PushConstant(std::string_view location, const glm::vec4& val) const
 {
     glUniform4fv(GetUniformLocation(location), 1, &val[0]);
 }
 
-void Shader::PushConstant(std::string_view location, const glm::mat3& val)
+void Shader::PushConstant(std::string_view location, const glm::mat3& val, bool transpose) const
 {
-    glUniformMatrix3fv(GetUniformLocation(location), 1, GL_FALSE, &val[0][0]);
+    glUniformMatrix3fv(GetUniformLocation(location), 1, transpose, &val[0][0]);
 }
 
-void Shader::PushConstant(std::string_view location, const glm::mat4& val)
+void Shader::PushConstant(std::string_view location, const glm::mat4& val, bool transpose) const
 {
-    glUniformMatrix4fv(GetUniformLocation(location), 1, GL_FALSE, &val[0][0]);
+    glUniformMatrix4fv(GetUniformLocation(location), 1, transpose, &val[0][0]);
 }
 
-uint32_t Shader::GetUniformLocation(std::string_view location)
+uint32_t Shader::GetUniformLocation(std::string_view location) const
 {
     P2REN_ASSERT_STRING_VIEW_NULL_TERMINATED(location);
     return glGetUniformLocation(m_ID, location.data());

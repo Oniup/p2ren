@@ -3,39 +3,24 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <fmt/base.h>
+#include <glad/gl.h>
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <filesystem>
 #include <string_view>
 
 #include "p2ren_core/resource_manager.h"
+#include "p2ren_core/transform.h"
 #include "p2ren_core/window.h"
 #include "p2ren_renderer/forward_renderer.h"
-#include "p2ren_renderer/rhi/buffer.h"
+#include "p2ren_renderer/resources/mesh.h"
+#include "p2ren_renderer/rhi/shader.h"
 
 namespace p2ren {
 
-struct Vertex
-{
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec3 Color;
-    glm::vec2 TexCoords;
-};
-
 Application* Application::s_Application = nullptr;
-
-constexpr std::array<Vertex, 4> PlaneVertices = {
-    // top right
-    Vertex{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-    // bottom right
-    Vertex{{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    // bottom left
-    Vertex{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-    // top left
-    Vertex{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-};
 
 // clang-format off
 constexpr std::array<unsigned, 6> PlaneIndices = {
@@ -89,22 +74,6 @@ void Application::Initialize(const ApplicationDescriptor& descriptor)
     // Initialize forward renderer
     m_Renderer->InitializeBackend();
     m_Renderer->InitializeResources();
-
-    // Create buffers
-    Buffer array_buffer(BufferType::Array);
-    Buffer element_buffer(BufferType::Element);
-    // Push data
-    array_buffer.PushData(PlaneVertices.data(), PlaneVertices.size());
-    element_buffer.PushData(PlaneIndices.data(), PlaneIndices.size());
-    // Define layout
-    std::array<VertexAttribute, 4> attributes = {
-        VertexAttribute(0, ShaderVertexDataType::Vec3), // Position
-        VertexAttribute(0, ShaderVertexDataType::Vec3), // Normal
-        VertexAttribute(0, ShaderVertexDataType::Vec3), // Color
-        VertexAttribute(0, ShaderVertexDataType::Vec2), // TexCoord
-    };
-    // Create vertex array
-    m_Test = VertexArray(attributes, std::move(array_buffer), std::move(element_buffer));
 }
 
 std::string Application::FindAssetDirectory()
@@ -135,6 +104,12 @@ std::string Application::FindAssetDirectory()
 
 void Application::Run()
 {
+    Mesh           mesh        = Mesh::GeneratePlane(Material{}, glm::vec3(0.0f, 0.0f, -0.0f));
+    Transform      transform   = Transform{.Position = glm::vec3(0.0f)};
+    ResourceHandle flat_shader = m_ResourceManager->QueryHandle<Shader>("Flat Color");
+
+    Buffer ubo_matrices(Buffer::Uniform);
+
     SDL_Event event;
     while (m_Window->IsOpen())
     {
@@ -143,6 +118,14 @@ void Application::Run()
             // TODO: make event dispatcher handle this
             m_Window->HandleSDLEvents(event);
         }
+
+        glClearColor(0.2f, 0.5f, 0.7f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        Shader* shader = m_ResourceManager->QueryResource(flat_shader);
+        shader->Bind();
+        shader->PushConstant("u_Model", transform.CreateModelMatrix());
+        mesh.Draw();
 
         m_Renderer->SwapBuffers();
     }
