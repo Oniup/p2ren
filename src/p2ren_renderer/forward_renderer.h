@@ -1,5 +1,6 @@
 #pragma once
 
+#include "p2ren_renderer/render_queue.h"
 typedef struct SDL_GLContextState* SDL_GLContext;
 
 namespace p2ren {
@@ -8,25 +9,27 @@ class Window;
 class ResourceManager;
 
 struct RendererCreateInfo;
-class RHIContext;
+class OpenGLContext;
 
 class ForwardRenderer
 {
 public:
-    static constexpr size_t ShaderPoolInitialCapacity = 20;
-
     ForwardRenderer(ResourceManager* resources_manager, const RendererCreateInfo& info);
     ~ForwardRenderer();
 
     void InitializeBackend(Window* window);
     void InitializeResources();
 
+    RenderQueue*       GetRenderQueue() { return &m_RenderQueue; }
+    const RenderQueue* GetRenderQueue() const { return &m_RenderQueue; }
+
     void SwapBuffers();
 
 private:
+    RenderQueue      m_RenderQueue;
     Window*          m_Window          = nullptr;
     ResourceManager* m_ResourceManager = nullptr;
-    RHIContext*      m_Context         = nullptr;
+    OpenGLContext*   m_Context         = nullptr;
 };
 
 } // namespace p2ren

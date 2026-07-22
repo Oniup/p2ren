@@ -309,7 +309,7 @@ void VertexArray::Bind() const
 
 void VertexArray::Draw(PrimitiveMode mode, uint32_t offset, uint32_t size) const
 {
-    int32_t gl_primitive = RHIContext::ConvertPrimitiveModeToRHI(mode);
+    int32_t gl_primitive = OpenGLContext::ConvertPrimitiveModeToOpenGL(mode);
 
     glBindVertexArray(m_ID);
     if (m_ElementBuffer.IsValid())
@@ -354,7 +354,16 @@ void VertexArray::Draw(PrimitiveMode mode, uint32_t offset, uint32_t size) const
 
 bool VertexArray::IsValid() const
 {
-    return m_ID != 0 && !m_ArrayBuffers.empty() && m_ArrayBuffers.front().IsValid();
+    if (m_ID != 0 && !m_ArrayBuffers.empty())
+    {
+        for (const Buffer& buffer : m_ArrayBuffers)
+        {
+            if (!buffer.IsValid())
+                return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 void VertexArray::InitializeAttributes(const VertexAttribute* attributes, size_t count)

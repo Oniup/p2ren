@@ -91,7 +91,7 @@ BinPackArguments: false
 BinPackParameters: true
 BitFieldColonSpacing: Both
 BraceWrapping:
-    AfterCaseLabel: false
+    AfterCaseLabel: true
     AfterClass: true
     AfterControlStatement: Always
     AfterEnum: true
@@ -100,7 +100,7 @@ BraceWrapping:
     AfterNamespace: false
     AfterObjCDeclaration: true
     AfterStruct: true
-    AfterUnion: false
+    AfterUnion: true
     BeforeCatch: false
     BeforeElse: true
     BeforeLambdaBody: true

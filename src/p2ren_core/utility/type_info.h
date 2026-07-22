@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdint>
+#include <limits>
 #include <string_view>
 #include <type_traits>
 
@@ -143,6 +144,8 @@ constexpr std::array<char, N> GetCleanedTypeNameArray()
 } // namespace p2ren::intern
 
 namespace p2ren {
+
+static constexpr uint64_t InvalidTypeID = std::numeric_limits<uint64_t>::max();
 
 template <typename T>
 struct TypeInfo

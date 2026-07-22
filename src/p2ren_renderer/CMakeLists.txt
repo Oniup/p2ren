@@ -9,23 +9,24 @@ PUBLIC
 target_sources(p2ren_renderer
 PUBLIC
     ./resources/material.h
-    ./resources/mesh.h
     ./resources/model.h
     ./rhi/buffer.h
     ./rhi/context.h
     ./rhi/shader.h
     ./rhi/texture.h
+    ./camera.h
     ./create_info.h
+    ./render_queue.h
     ./draw_modes.h
     ./forward_renderer.h
 PRIVATE
     ./resources/material.cpp
-    ./resources/mesh.cpp
     ./resources/model.cpp
     ./rhi/buffer.cpp
     ./rhi/context.cpp
     ./rhi/shader.cpp
     ./rhi/texture.cpp
+    ./camera.cpp
     ./forward_renderer.cpp
 )
 

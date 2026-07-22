@@ -125,8 +125,7 @@ public:
     bool IsValid() const;
 
     void Bind() const;
-    void Draw(PrimitiveMode mode = PrimitiveMode::Triangles, uint32_t offset = 0,
-              uint32_t size = 0) const;
+    void Draw(PrimitiveMode mode, uint32_t offset = 0, uint32_t size = 0) const;
 
     std::vector<Buffer>& GetArrayBuffers() { return m_ArrayBuffers; }
     Buffer&              GetElementBuffer() { return m_ElementBuffer; }

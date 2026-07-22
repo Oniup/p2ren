@@ -25,6 +25,11 @@ public:
     {
     }
 
+    ResourceHandle(ResourceHandle&& other)                 = default;
+    ResourceHandle(const ResourceHandle& other)            = default;
+    ResourceHandle& operator=(ResourceHandle&& other)      = default;
+    ResourceHandle& operator=(const ResourceHandle& other) = default;
+
     bool IsValid() const { return m_ID != InvalidResourceHandleID; }
     bool operator==(const ResourceHandle& other) const { return m_ID == other.m_ID; }
 
@@ -40,7 +45,8 @@ private:
     {
     }
 
-    union {
+    union
+    {
         uint32_t m_ID = InvalidResourceHandleID; /// Combined resource ID
         struct
         {

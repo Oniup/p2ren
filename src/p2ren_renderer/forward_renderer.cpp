@@ -9,12 +9,13 @@
 #include "p2ren_renderer/create_info.h"
 #include "p2ren_renderer/rhi/context.h"
 #include "p2ren_renderer/rhi/shader.h"
+#include "p2ren_renderer/rhi/texture.h"
 
 namespace p2ren {
 
 ForwardRenderer::ForwardRenderer(ResourceManager* resources_manager, const RendererCreateInfo& info)
     : m_ResourceManager(resources_manager),
-      m_Context(new RHIContext(info.EnableOpenGLDebugCallback)) // SDL and OpenGL Attributes
+      m_Context(new OpenGLContext(info.EnableOpenGLDebugCallback)) // SDL and OpenGL Attributes
 {
 }
 
@@ -36,13 +37,32 @@ void ForwardRenderer::InitializeBackend(Window* window)
 void ForwardRenderer::InitializeResources()
 {
     // Initialize pools
-    m_ResourceManager->InitializePool<Shader>(ShaderPoolInitialCapacity);
+    m_ResourceManager->InitializePool<Shader>();
+    m_ResourceManager->InitializePool<Texture>();
 
-    // Initialize default resources
+    // Initialize default Shaders
+    // ---------------------------------------------------------------------------------------------
     m_ResourceManager->PushResource<Shader>(
         "Flat Color",
         Shader(m_ResourceManager->GetAssetPath("shaders/base.vert"),
                m_ResourceManager->GetAssetPath("shaders/flat_color.frag")));
+
+    m_ResourceManager->PushResource<Shader>(
+        "Basic Blinn-Phong",
+        Shader(m_ResourceManager->GetAssetPath("shaders/base.vert"),
+               m_ResourceManager->GetAssetPath("shaders/base-blinn-phong.frag")));
+
+    // Initialize default Textures
+    // ---------------------------------------------------------------------------------------------
+    ResourceHandle default_material_white = m_ResourceManager->PushResource<Texture>(
+        "Default Texture",
+        Texture(m_ResourceManager->GetAssetPath("textures/default.png"),
+                TextureCreateInfo{
+                    // can afford terrible mipmaps as the texture is only white
+                    .Mipmap = MipmapMode::Nearest,
+                }));
+
+    intern::InitializeDefaultImageAssignment(default_material_white);
 }
 
 void ForwardRenderer::SwapBuffers()

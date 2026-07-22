@@ -12,16 +12,17 @@
 #include <filesystem>
 #include <string_view>
 
+#include "p2ren_core/resource_handle.h"
 #include "p2ren_core/resource_manager.h"
+#include "p2ren_core/time.h"
+#include "p2ren_core/transform.h"
 #include "p2ren_core/window.h"
 #include "p2ren_renderer/forward_renderer.h"
-#include "p2ren_renderer/resources/mesh.h"
+#include "p2ren_renderer/resources/model.h"
 #include "p2ren_renderer/rhi/shader.h"
-#include "p2ren_world/components/transform.h"
+#include "p2ren_renderer/rhi/texture.h"
 
 namespace p2ren {
-
-Application* Application::s_Application = nullptr;
 
 // clang-format off
 constexpr std::array<unsigned, 6> PlaneIndices = {
@@ -30,12 +31,30 @@ constexpr std::array<unsigned, 6> PlaneIndices = {
 };
 // clang-format on
 
-Application::Application()
+std::string Application::FindAssetDirectory()
 {
-    P2REN_ASSERT(s_Application == nullptr,
-                 "Cannot have two application instances in memory running at the same time");
+    namespace fs = std::filesystem;
 
-    s_Application = this;
+    std::string_view base_path(GetBasePath());
+    fs::path         working_directory(base_path);
+
+    // Iterate over parent paths to check if it contains an "assets" directory
+    while (true)
+    {
+        // Check if target asset path exists
+        fs::path potential_path = working_directory / "assets";
+        if (fs::exists(potential_path) && fs::is_directory(potential_path))
+            return potential_path.string();
+
+        // Doesn't exist? Check if parent path exists
+        if (!working_directory.has_parent_path() ||
+            working_directory == working_directory.parent_path())
+            break;
+
+        // Move to that parent path
+        working_directory = working_directory.parent_path();
+    }
+    P2REN_FATAL("Failed to find asset directory starting from path {}", base_path);
 }
 
 Application::~Application()
@@ -64,40 +83,39 @@ void Application::Initialize(const ApplicationCreateInfo& create_info)
     // Initialize forward renderer and RHI context
     m_Renderer->InitializeBackend(m_Window);
     m_Renderer->InitializeResources();
-}
 
-std::string Application::FindAssetDirectory()
-{
-    namespace fs = std::filesystem;
-
-    std::string_view base_path(GetBasePath());
-    fs::path         working_directory(base_path);
-
-    // Iterate over parent paths to check if it contains an "assets" directory
-    while (true)
-    {
-        // Check if target asset path exists
-        fs::path potential_path = working_directory / "assets";
-        if (fs::exists(potential_path) && fs::is_directory(potential_path))
-            return potential_path.string();
-
-        // Doesn't exist? Check if parent path exists
-        if (!working_directory.has_parent_path() ||
-            working_directory == working_directory.parent_path())
-            break;
-
-        // Move to that parent path
-        working_directory = working_directory.parent_path();
-    }
-    P2REN_FATAL("Failed to find asset directory starting from path {}", base_path);
+    OnStartup();
 }
 
 void Application::Run()
 {
-    Mesh           mesh        = Mesh::GeneratePlane(Material{}, glm::vec3(0.0f, 0.0f, -0.0f));
-    Transform      transform   = Transform{.Position = glm::vec3(0.0f)};
-    ResourceHandle flat_shader = m_ResourceManager->QueryHandle<Shader>("Flat Color");
+    TextureCreateInfo default_create_info{
+        .MinFilter  = TextureFilter::Linear,
+        .MagFilter  = TextureFilter::Linear,
+        .Anisotropy = 16,
+    };
 
+    ResourceHandle diffuse = m_ResourceManager->PushResource(
+        "Container Color",
+        Texture(m_ResourceManager->GetAssetPath("textures/container/color.png"),
+                default_create_info));
+
+    Mesh mesh = Mesh::GeneratePlane(
+        PhongMaterial{
+            .Diffuse  = diffuse,
+            .Specular = m_ResourceManager->PushResource(
+                "Container Specular",
+                Texture(m_ResourceManager->GetAssetPath("textures/container/specular.png"),
+                        default_create_info)),
+        },
+        glm::vec3(0.0f, 0.0f, 0.0f));
+
+    Transform      transform     = Transform{};
+    ResourceHandle shader_handle = m_ResourceManager->QueryHandle<Shader>("Basic Blinn-Phong");
+    PhongMaterial::SetupShaderMaterial(m_ResourceManager->QueryResource<Shader>(shader_handle),
+                                       true);
+
+    Timestep  timestep;
     SDL_Event event;
     while (m_Window->IsOpen())
     {
@@ -107,13 +125,18 @@ void Application::Run()
             m_Window->HandleSDLEvents(event);
         }
 
+        timestep.CalculateDeltaTime();
+
         glClearColor(0.2f, 0.5f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Shader* shader = m_ResourceManager->QueryResource(flat_shader);
+        Shader* shader = m_ResourceManager->QueryResource(shader_handle);
         shader->Bind();
         shader->PushConstant("u_Model", transform.CreateModelMatrix());
-        mesh.Draw();
+        mesh.GetMaterial().PushConstantsToShader(shader, m_ResourceManager);
+        // shader->PushConstant(m_ResourceManager->QueryResource(diffuse), 0);
+
+        mesh.Draw(PrimitiveMode::Triangles);
 
         m_Renderer->SwapBuffers();
     }

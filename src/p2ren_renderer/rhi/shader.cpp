@@ -9,6 +9,7 @@
 #include <string_view>
 
 #include "p2ren_core/utility/error.h"
+#include "p2ren_renderer/rhi/texture.h"
 
 #define ERROR_BUFFER_LENGTH 1024
 
@@ -78,6 +79,7 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
             char buffer[ERROR_BUFFER_LENGTH];
             glGetShaderInfoLog(shader, ERROR_BUFFER_LENGTH, nullptr, buffer);
 
+            glDeleteShader(shader);
             for (size_t j = 0; j < i; j++)
                 glDeleteShader(shaders[j]);
 
@@ -107,6 +109,8 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success)
     {
+        glDeleteProgram(program);
+
         char error_message[ERROR_BUFFER_LENGTH];
         glGetProgramInfoLog(program, ERROR_BUFFER_LENGTH, nullptr, error_message);
 
@@ -199,6 +203,12 @@ void Shader::PushConstant(std::string_view location, const glm::mat3& val, bool 
 void Shader::PushConstant(std::string_view location, const glm::mat4& val, bool transpose) const
 {
     glUniformMatrix4fv(GetUniformLocation(location), 1, transpose, &val[0][0]);
+}
+
+void Shader::PushConstant(const Texture* texture, uint32_t active_id) const
+{
+    glActiveTexture(GL_TEXTURE0 + active_id);
+    texture->Bind();
 }
 
 uint32_t Shader::GetUniformLocation(std::string_view location) const

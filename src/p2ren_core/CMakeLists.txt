@@ -14,10 +14,14 @@ PUBLIC
     ./utility/type_info.h
     ./resource_handle.h
     ./resource_manager.h
+    ./time.h
+    ./transform.h
     ./window.h
 PRIVATE
     ./utility/color.cpp
     ./utility/error.cpp
+    ./time.cpp
+    ./transform.cpp
     ./window.cpp
 )
 

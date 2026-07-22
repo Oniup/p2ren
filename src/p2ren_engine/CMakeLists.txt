@@ -20,7 +20,6 @@ target_link_libraries(p2ren_engine
 PUBLIC
     p2ren::core
     p2ren::renderer
-    p2ren::world
 
 PRIVATE
     SDL3::SDL3 # TODO: Remove later

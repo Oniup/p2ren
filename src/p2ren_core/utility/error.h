@@ -47,7 +47,7 @@ namespace intern {
                         std::string_view expression, fmt::format_string<Args...> format,
                         Args&&... args)
     {
-        Error_PrintErrorHeaderMessage(ErrorSeverity::High, file, function, line, expression);
+        Error_PrintErrorHeaderMessage(ErrorSeverity::Fatal, file, function, line, expression);
 
         fmt::println(stderr, format, std::forward<Args>(args)...);
         std::fflush(stderr);
@@ -110,7 +110,7 @@ namespace intern {
     do                                                                                             \
     {                                                                                              \
         p2ren::intern::Error_OnLog(                                                                \
-            p2ren::ErrorSeverity::High, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__);            \
+            p2ren::ErrorSeverity::Fatal, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__);           \
         P2REN_DEBUG_BREAK;                                                                         \
         std::exit(-1);                                                                             \
     }                                                                                              \

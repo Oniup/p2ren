@@ -10,6 +10,8 @@
 
 namespace p2ren {
 
+class Texture;
+
 // TODO: Push constants for
 //          - Texture
 //          - Framebuffer
@@ -43,6 +45,8 @@ public:
                       bool transpose = false) const;
     void PushConstant(std::string_view location, const glm::mat4& val,
                       bool transpose = false) const;
+
+    void PushConstant(const Texture* texture, uint32_t active_id) const;
 
 private:
     uint32_t GetUniformLocation(std::string_view location) const;

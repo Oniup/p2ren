@@ -4,12 +4,7 @@
 int main()
 {
     p2ren_example::Game game;
-    game.Initialize(p2ren::ApplicationCreateInfo{
-        .Window =
-            {
-                .Resolution = p2ren::WindowResolution::Auto,
-            },
-    });
+    game.Initialize(p2ren::ApplicationCreateInfo{});
     game.Run();
 
     return 0;

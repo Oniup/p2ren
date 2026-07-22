@@ -117,7 +117,7 @@ public:
         return "";
     }
 
-    void Destroy(const ResourceHandle<T>& handle)
+    void DestroyResource(const ResourceHandle<T>& handle)
     {
         if (Contains(handle))
         {

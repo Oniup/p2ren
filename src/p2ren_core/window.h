@@ -50,8 +50,8 @@ struct WindowCreateInfo
     std::string      Title      = "P2 Ren"; // Window display title
     int32_t          Width      = 800;      // Set Resolution to Custom to manually set size
     int32_t          Height     = 800;      // Set Resolution to Custom to manually set size
-    WindowResolution Resolution = WindowResolution::Custom; // Set size based on this
-    WindowFlags      Flags      = WindowFlags_Resizable;    // Window properties
+    WindowResolution Resolution = WindowResolution::Auto; // Set size based on this
+    WindowFlags      Flags      = WindowFlags_Resizable;  // Window properties
 };
 
 class Window

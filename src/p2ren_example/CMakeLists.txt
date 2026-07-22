@@ -1,4 +1,6 @@
 add_executable(p2ren_example
+    ./actors/camera_controller.h
+    ./actors/camera_controller.cpp
     ./game.h
     ./game.cpp
     ./main.cpp

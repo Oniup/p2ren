@@ -23,6 +23,8 @@ out VS_OUT
 }
 vs_out;
 
+// uniform vec2 u_Material_TilingFactor;
+
 void main()
 {
     vec4 position = vec4(a_Position, 1.0);

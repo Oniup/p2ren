@@ -10,6 +10,8 @@
 
 namespace p2ren {
 
+OpenGLContext* OpenGLContext::s_Instance = nullptr;
+
 #define EFMT "OpenGL ID: {}, Source: {}, Type: {}: {}"
 void GLAPIENTRY glDebugOutputCallback(GLenum source, GLenum type, unsigned int id, GLenum severity,
                                       GLsizei length, const char* message, const void* userParam)
@@ -54,7 +56,7 @@ void GLAPIENTRY glDebugOutputCallback(GLenum source, GLenum type, unsigned int i
     }
 }
 
-int32_t RHIContext::ConvertPolygonModeToRHI(PolygonMode mode)
+int32_t OpenGLContext::ConvertPolygonModeToOpenGL(PolygonMode mode)
 {
     switch (mode)
     {
@@ -65,7 +67,7 @@ int32_t RHIContext::ConvertPolygonModeToRHI(PolygonMode mode)
     }
 }
 
-int32_t RHIContext::ConvertPrimitiveModeToRHI(PrimitiveMode mode)
+int32_t OpenGLContext::ConvertPrimitiveModeToOpenGL(PrimitiveMode mode)
 {
     switch (mode)
     {
@@ -80,8 +82,84 @@ int32_t RHIContext::ConvertPrimitiveModeToRHI(PrimitiveMode mode)
     }
 }
 
-RHIContext::RHIContext(bool enable_hardware_debug_callback)
+uint32_t OpenGLContext::ConvertTextureTypeToOpenGL(TextureType type)
 {
+    switch (type)
+    {
+    case TextureType::Tex2D:   return GL_TEXTURE_2D;
+    case TextureType::Tex3D:   return GL_TEXTURE_3D;
+    case TextureType::CubeMap: return GL_TEXTURE_CUBE_MAP;
+    }
+}
+
+int32_t OpenGLContext::ConvertTextureWrapToOpenGL(TextureWrap wrap)
+{
+    switch (wrap)
+    {
+    case TextureWrap::Repeat:         return GL_REPEAT;
+    case TextureWrap::MirroredRepeat: return GL_MIRRORED_REPEAT;
+    case TextureWrap::ClampToEdge:    return GL_CLAMP_TO_EDGE;
+    case TextureWrap::ClampToBorder:  return GL_CLAMP_TO_BORDER;
+    }
+}
+
+void OpenGLContext::ConvertTextureFormatToOpenGL(TextureFormat format, uint32_t& base_format,
+                                                 uint32_t& output_format)
+{
+    switch (format)
+    {
+    case TextureFormat::RGB:     base_format = output_format = GL_RGB; break;
+    case TextureFormat::RGB8:    base_format = output_format = GL_RGB8; break;
+    case TextureFormat::RGBA:    base_format = output_format = GL_RGBA; break;
+    case TextureFormat::RGBA8:   base_format = output_format = GL_RGBA8; break;
+    case TextureFormat::Depth24: base_format = output_format = GL_DEPTH_COMPONENT; break;
+    case TextureFormat::Depth32f:
+        base_format   = GL_DEPTH_COMPONENT32F;
+        output_format = GL_DEPTH_COMPONENT;
+        break;
+    case TextureFormat::Depth24Stencil8: base_format = output_format = GL_DEPTH24_STENCIL8; break;
+    }
+}
+
+void OpenGLContext::ConvertTextureFiltersToOpenGL(TextureFilter min_filter,
+                                                  TextureFilter mag_filter, MipmapMode mipmap,
+                                                  int32_t& min_out, int32_t& mag_out)
+{
+    mag_out = mag_filter == TextureFilter::Linear ? GL_LINEAR : GL_NEAREST;
+
+    if (mipmap == MipmapMode::None)
+        min_out = min_filter == TextureFilter::Linear ? GL_LINEAR : GL_NEAREST;
+    else
+    {
+        switch (min_filter)
+        {
+        case TextureFilter::Nearest:
+            min_out =
+                mipmap == MipmapMode::Linear ? GL_NEAREST_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST;
+            break;
+        case TextureFilter::Linear:
+            min_out =
+                mipmap == MipmapMode::Linear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST;
+            break;
+        }
+    }
+}
+
+int32_t OpenGLContext::GetMaxMSAASamples()
+{
+    return s_Instance->m_MaxMSAASamples;
+}
+
+int32_t OpenGLContext::GetMaxAnisotropy()
+{
+    return s_Instance->m_MaxAnisotropy;
+}
+
+OpenGLContext::OpenGLContext(bool enable_hardware_debug_callback)
+{
+    P2REN_ASSERT(!s_Instance,
+                 "RHI/OpenGL Context has already been initialized, cannot have 2 instances");
+
     if (!SDL_Init(SDL_INIT_VIDEO))
         P2REN_FATAL("Failed to initialize SDL: {}", SDL_GetError());
 
@@ -98,12 +176,12 @@ RHIContext::RHIContext(bool enable_hardware_debug_callback)
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 }
 
-RHIContext::~RHIContext()
+OpenGLContext::~OpenGLContext()
 {
     Terminate();
 }
 
-void RHIContext::InitializeBackend(Window* window)
+void OpenGLContext::InitializeBackend(Window* window)
 {
     m_InternalContext = SDL_GL_CreateContext(window->GetInternalContext());
     if (!m_InternalContext)
@@ -130,9 +208,12 @@ void RHIContext::InitializeBackend(Window* window)
         glDebugMessageCallback(glDebugOutputCallback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
+
+    glGetIntegerv(GL_MAX_SAMPLES, &m_MaxMSAASamples);
+    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &m_MaxAnisotropy);
 }
 
-void RHIContext::Terminate()
+void OpenGLContext::Terminate()
 {
     if (m_InternalContext)
     {
@@ -140,6 +221,8 @@ void RHIContext::Terminate()
         SDL_Quit();
 
         m_InternalContext = nullptr;
+
+        s_Instance = nullptr;
     }
 }
 

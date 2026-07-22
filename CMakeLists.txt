@@ -21,7 +21,7 @@ if (P2REN_BUILD_EXAMPLE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}/Archive")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}")
-endif(0)
+endif()
 
 # Library
 # ==============================================================================
@@ -30,7 +30,6 @@ add_subdirectory(thirdparty SYSTEM) # Thirdparty
 # Modules
 add_subdirectory(src/p2ren_core) # Load first
 add_subdirectory(src/p2ren_renderer)
-add_subdirectory(src/p2ren_world)
 add_subdirectory(src/p2ren_engine) # Load last
 
 # Main interface library
