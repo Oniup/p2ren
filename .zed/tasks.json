@@ -25,7 +25,7 @@
   {
     "label": "Cmake: Build and Run",
     "command": "cmd",
-    "args": ["/c", "cmake --build build && ./build/Debug/p2ren_example.exe"],
+    "args": ["/c", "cmake --build build && ./build/Debug/glfwd_example.exe"],
     "use_new_terminal": false,
     "allow_concurrent_runs": false,
   },

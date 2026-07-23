@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(p2ren
+project(glfwd
     LANGUAGES CXX C
 )
 
@@ -13,10 +13,10 @@ set(CMAKE_CXX_EXTENSIONS OFF) # For cross platform/compiler compatibility
 # Build settings and options
 # ==============================================================================
 # Options
-option(P2REN_BUILD_EXAMPLE "Build example executable" ON)
+option(glfwd_BUILD_EXAMPLE "Build example executable" ON)
 
 # Build directory setup for when building example is enabled
-if (P2REN_BUILD_EXAMPLE)
+if (glfwd_BUILD_EXAMPLE)
     set(BINARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/$<CONFIG>")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}/Archive")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${BINARY_OUTPUT_DIRECTORY}")
@@ -28,25 +28,10 @@ endif()
 add_subdirectory(thirdparty SYSTEM) # Thirdparty
 
 # Modules
-add_subdirectory(src/p2ren_core) # Load first
-add_subdirectory(src/p2ren_renderer)
-add_subdirectory(src/p2ren_engine) # Load last
+add_subdirectory(src/glfwd_core) # Load first
+add_subdirectory(src/glfwd_renderer)
+add_subdirectory(src/glfwd_engine) # Load last
 
-# Main interface library
-# add_library(p2ren INTERFACE)
-# target_link_libraries(p2ren
-# INTERFACE
-#     p2ren::engine
-#     p2ren::core
-#     p2ren::world
-#     p2ren::renderer
-# )
-# target_include_directories(p2ren
-# INTERFACE
-#     ${CMAKE_CURRENT_SOURCE_DIR}/src
-# )
-# add_library(p2ren::p2ren ALIAS p2ren)
-
-if (${P2REN_BUILD_EXAMPLE})
-    add_subdirectory(src/p2ren_example)
+if (${glfwd_BUILD_EXAMPLE})
+    add_subdirectory(src/glfwd_example)
 endif()
