@@ -15,31 +15,31 @@
 
 namespace glfwd {
 
-namespace intern {
+namespace {
 
-    constexpr size_t ShaderTypeCount = 3;
+    constexpr size_t SHADER_TYPE_COUNT = 3;
 
-    constexpr std::array<uint32_t, ShaderTypeCount> ShaderTypes = {
+    constexpr std::array<uint32_t, SHADER_TYPE_COUNT> SHADER_TYPES = {
         GL_VERTEX_SHADER,
         GL_FRAGMENT_SHADER,
         GL_GEOMETRY_SHADER,
     };
 
-    constexpr std::array<std::string_view, ShaderTypeCount> ShaderTypeNames = {
+    constexpr std::array<std::string_view, SHADER_TYPE_COUNT> SHADER_TYPE_NAMES = {
         "Vertex",
         "Fragment",
         "Geometry",
     };
 
-} // namespace intern
+} // namespace
 
 Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_view geometry)
 {
     GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(vertex);
     GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(fragment);
 
-    std::array<std::string_view, intern::ShaderTypeCount> paths   = {vertex, fragment, geometry};
-    std::array<uint32_t, intern::ShaderTypeCount>         shaders = {};
+    std::array<std::string_view, SHADER_TYPE_COUNT> paths   = {vertex, fragment, geometry};
+    std::array<uint32_t, SHADER_TYPE_COUNT>         shaders = {};
 
     size_t count = 2;
     if (!geometry.empty())
@@ -59,12 +59,12 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
         {
             for (size_t j = 0; j < i; j++)
                 glDeleteShader(shaders[j]);
-            GLFWD_ERROR("Failed to read {} shader at path {}", intern::ShaderTypeNames[i], path);
+            GLFWD_ERROR("Failed to read {} shader at path {}", SHADER_TYPE_NAMES[i], path);
             return;
         }
 
         // Compile shader
-        uint32_t shader = glCreateShader(intern::ShaderTypes[i]);
+        uint32_t shader = glCreateShader(SHADER_TYPES[i]);
         glShaderSource(shader, 1, &source, nullptr);
         glCompileShader(shader);
 
@@ -83,10 +83,8 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
             for (size_t j = 0; j < i; j++)
                 glDeleteShader(shaders[j]);
 
-            GLFWD_ERROR("Failed to compile {} shader at path {}:\n{}",
-                        intern::ShaderTypeNames[i],
-                        path,
-                        buffer);
+            GLFWD_ERROR(
+                "Failed to compile {} shader at path {}:\n{}", SHADER_TYPE_NAMES[i], path, buffer);
             return;
         }
 
@@ -117,7 +115,7 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
         std::string shader_info;
         for (size_t i = 0; i < count; i++)
         {
-            shader_info += fmt::format("\t- {} -> '{}'\n", intern::ShaderTypeNames[i], paths[i]);
+            shader_info += fmt::format("\t- {} -> '{}'\n", SHADER_TYPE_NAMES[i], paths[i]);
         }
         GLFWD_ERROR("Failed to link shaders\n{}{}", shader_info, error_message);
         return;

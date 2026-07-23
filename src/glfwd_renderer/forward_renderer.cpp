@@ -62,7 +62,7 @@ void ForwardRenderer::InitializeResources()
                     .Mipmap = MipmapMode::Nearest,
                 }));
 
-    intern::InitializeDefaultImageAssignment(default_material_white);
+    intern::InitializeMaterialDefaultTextures(default_material_white);
 }
 
 void ForwardRenderer::SwapBuffers()

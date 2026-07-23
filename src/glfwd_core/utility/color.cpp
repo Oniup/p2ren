@@ -3,7 +3,7 @@
 #include "glfwd_core/utility/error.h"
 
 namespace glfwd {
-namespace intern {
+namespace {
 
     uint8_t ConvertHexNibbleToValue(char val)
     {
@@ -51,7 +51,7 @@ namespace intern {
         return true;
     }
 
-} // namespace intern
+} // namespace
 
 glm::vec3 Color::NormalizeRGB(uint8_t r, uint8_t g, uint8_t b)
 {
@@ -75,12 +75,12 @@ glm::vec4 Color::NormalizeRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 glm::vec3 Color::ConvertFromtHexRGB(std::string_view rgb_hex)
 {
     size_t offset, source_length;
-    if (intern::ConvertFromHexSetup(rgb_hex, offset, source_length))
+    if (ConvertFromHexSetup(rgb_hex, offset, source_length))
         return glm::vec3(1.0f);
 
-    uint8_t r = intern::ConvertHexDigitToByte(rgb_hex.substr(offset + 0, 2));
-    uint8_t g = intern::ConvertHexDigitToByte(rgb_hex.substr(offset + 2, 2));
-    uint8_t b = intern::ConvertHexDigitToByte(rgb_hex.substr(offset + 4, 2));
+    uint8_t r = ConvertHexDigitToByte(rgb_hex.substr(offset + 0, 2));
+    uint8_t g = ConvertHexDigitToByte(rgb_hex.substr(offset + 2, 2));
+    uint8_t b = ConvertHexDigitToByte(rgb_hex.substr(offset + 4, 2));
 
     return NormalizeRGB(r, g, b);
 }
@@ -88,14 +88,13 @@ glm::vec3 Color::ConvertFromtHexRGB(std::string_view rgb_hex)
 glm::vec4 Color::ConvertFromtHexRGBA(std::string_view rgba_hex)
 {
     size_t offset, source_length;
-    if (intern::ConvertFromHexSetup(rgba_hex, offset, source_length))
+    if (ConvertFromHexSetup(rgba_hex, offset, source_length))
         return glm::vec4(1.0f);
 
-    uint8_t r = intern::ConvertHexDigitToByte(rgba_hex.substr(offset + 0, 2));
-    uint8_t g = intern::ConvertHexDigitToByte(rgba_hex.substr(offset + 2, 2));
-    uint8_t b = intern::ConvertHexDigitToByte(rgba_hex.substr(offset + 4, 2));
-    uint8_t a =
-        source_length == 8 ? intern::ConvertHexDigitToByte(rgba_hex.substr(offset + 6, 2)) : 0;
+    uint8_t r = ConvertHexDigitToByte(rgba_hex.substr(offset + 0, 2));
+    uint8_t g = ConvertHexDigitToByte(rgba_hex.substr(offset + 2, 2));
+    uint8_t b = ConvertHexDigitToByte(rgba_hex.substr(offset + 4, 2));
+    uint8_t a = source_length == 8 ? ConvertHexDigitToByte(rgba_hex.substr(offset + 6, 2)) : 0;
 
     return NormalizeRGBA(r, g, b, a);
 }

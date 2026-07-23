@@ -31,7 +31,7 @@ enum class TextureType
     Tex3D,
     CubeMap,
 };
-constexpr std::array<std::string_view, 3> s_TextureTypeNames = {
+constexpr std::array<std::string_view, 3> TEXTURE_TYPE_NAMES = {
     "Texture 2D",
     "Texture 3D",
     "Cube Map",

@@ -9,7 +9,7 @@
 namespace glfwd {
 
 namespace intern {
-    void InitializeDefaultImageAssignment(const ResourceHandle<Texture>& white_texture);
+    void InitializeMaterialDefaultTextures(const ResourceHandle<Texture>& white_texture);
 }
 
 class Shader;

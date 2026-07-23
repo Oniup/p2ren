@@ -34,7 +34,7 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         if (!stream)
         {
             GLFWD_ERROR("Failed to load embedded {} texture buffer as a stream: {}",
-                        s_TextureTypeNames[(int)info.Type],
+                        TEXTURE_TYPE_NAMES[(int)info.Type],
                         SDL_GetError());
             return;
         }
@@ -43,7 +43,7 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         if (!image_surface)
         {
             GLFWD_ERROR("Failed to load embedded {} texture buffer: {}",
-                        s_TextureTypeNames[(int)info.Type],
+                        TEXTURE_TYPE_NAMES[(int)info.Type],
                         SDL_GetError());
             SDL_CloseIO(stream);
         }
@@ -52,7 +52,7 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         if (SetSizeFromSurface(image_surface, info))
             LoadOpenGLTexture(image_surface, info);
         else
-            GLFWD_ERROR("Failed to load embedded {} texture", s_TextureTypeNames[(int)info.Type]);
+            GLFWD_ERROR("Failed to load embedded {} texture", TEXTURE_TYPE_NAMES[(int)info.Type]);
         SDL_DestroySurface(image_surface);
     }
 }
@@ -76,7 +76,7 @@ Texture::Texture(std::string_view path, const TextureCreateInfo info)
     else
     {
         GLFWD_ERROR(
-            "Failed to load {} texture from path {}", s_TextureTypeNames[(int)info.Type], path);
+            "Failed to load {} texture from path {}", TEXTURE_TYPE_NAMES[(int)info.Type], path);
     }
     SDL_DestroySurface(image_surface);
 }
@@ -90,7 +90,7 @@ Texture::Texture(SDL_Surface* surface, const TextureCreateInfo info)
         {
             GLFWD_ERROR(
                 "Cannot create {} without a surface provided or at least a width and height",
-                s_TextureTypeNames[(int)info.Type]);
+                TEXTURE_TYPE_NAMES[(int)info.Type]);
             return;
         }
 
@@ -274,7 +274,7 @@ bool Texture::LoadOpenGLTexture(SDL_Surface* surface, const TextureCreateInfo& i
         glGenerateMipmap(type);
 
     GLFWD_INFO("Successfully initialized {} ({}, {})",
-               s_TextureTypeNames[(int)info.Type],
+               TEXTURE_TYPE_NAMES[(int)info.Type],
                m_Width,
                m_Height);
     return true;

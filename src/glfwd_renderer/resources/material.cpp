@@ -5,26 +5,28 @@
 
 namespace glfwd {
 
+namespace {
+    ResourceHandle<Texture> s_DefaultWhiteTexture = {};
+}
+
 namespace intern {
 
-    ResourceHandle<Texture> s_DefaultWhiteTexture = {};
-
-    void InitializeDefaultImageAssignment(const ResourceHandle<Texture>& white_texture)
+    void InitializeMaterialDefaultTextures(const ResourceHandle<Texture>& white_texture)
     {
-        intern::s_DefaultWhiteTexture = white_texture;
+        s_DefaultWhiteTexture = white_texture;
     }
 
 } // namespace intern
 
 PhongMaterial::ColorAttribute::ColorAttribute()
     : Color(glm::vec3(1.0f)),
-      TextureHandle(intern::s_DefaultWhiteTexture)
+      TextureHandle(s_DefaultWhiteTexture)
 {
 }
 
 PhongMaterial::ColorAttribute::ColorAttribute(glm::vec3 color)
     : Color(color),
-      TextureHandle(intern::s_DefaultWhiteTexture)
+      TextureHandle(s_DefaultWhiteTexture)
 {
 }
 

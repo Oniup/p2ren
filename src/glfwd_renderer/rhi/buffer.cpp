@@ -9,7 +9,7 @@
 #include "glfwd_renderer/rhi/context.h"
 
 namespace glfwd {
-namespace intern {
+namespace {
 
     int32_t ConvertDataTypeToOpenGL(VertexAttribute::DataType type)
     {
@@ -65,7 +65,7 @@ namespace intern {
         }
     };
 
-} // namespace intern
+} // namespace
 
 std::string_view Buffer::ConvertTypeToString(Type type)
 {
@@ -368,13 +368,13 @@ bool VertexArray::IsValid() const
 
 void VertexArray::InitializeAttributes(const VertexAttribute* attributes, size_t count)
 {
-    std::vector<intern::AttributeCreateInfo> attrib_info(m_ArrayBuffers.size());
+    std::vector<AttributeCreateInfo> attrib_info(m_ArrayBuffers.size());
 
     // Calculate strides and checks
     for (size_t i = 0; i < count; i++)
     {
-        intern::AttributeCreateInfo& info  = attrib_info[attributes[i].BufferIndex];
-        info.Stride                       += attributes[i].GetShaderTypeByteSize();
+        AttributeCreateInfo& info  = attrib_info[attributes[i].BufferIndex];
+        info.Stride               += attributes[i].GetShaderTypeByteSize();
 
         if (attributes[i].BufferIndex >= m_ArrayBuffers.size())
         {
@@ -390,8 +390,8 @@ void VertexArray::InitializeAttributes(const VertexAttribute* attributes, size_t
     Buffer* prev_buffer = nullptr;
     for (size_t i = 0; i < count; i++)
     {
-        intern::AttributeCreateInfo& info   = attrib_info[attributes[i].BufferIndex];
-        const VertexAttribute&       attrib = attributes[i];
+        AttributeCreateInfo&   info   = attrib_info[attributes[i].BufferIndex];
+        const VertexAttribute& attrib = attributes[i];
 
         // The reason why you should group your buffers
         Buffer* target_buffer = &m_ArrayBuffers[attrib.BufferIndex];
