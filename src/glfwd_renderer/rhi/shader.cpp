@@ -35,8 +35,8 @@ namespace intern {
 
 Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_view geometry)
 {
-    glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(vertex);
-    glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(fragment);
+    GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(vertex);
+    GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(fragment);
 
     std::array<std::string_view, intern::ShaderTypeCount> paths   = {vertex, fragment, geometry};
     std::array<uint32_t, intern::ShaderTypeCount>         shaders = {};
@@ -45,7 +45,7 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
     if (!geometry.empty())
     {
         count = 3;
-        glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(geometry);
+        GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(geometry);
     }
 
     for (size_t i = 0; i < count; i++)
@@ -59,7 +59,7 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
         {
             for (size_t j = 0; j < i; j++)
                 glDeleteShader(shaders[j]);
-            glfwd_ERROR("Failed to read {} shader at path {}", intern::ShaderTypeNames[i], path);
+            GLFWD_ERROR("Failed to read {} shader at path {}", intern::ShaderTypeNames[i], path);
             return;
         }
 
@@ -83,7 +83,7 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
             for (size_t j = 0; j < i; j++)
                 glDeleteShader(shaders[j]);
 
-            glfwd_ERROR("Failed to compile {} shader at path {}:\n{}",
+            GLFWD_ERROR("Failed to compile {} shader at path {}:\n{}",
                         intern::ShaderTypeNames[i],
                         path,
                         buffer);
@@ -119,7 +119,7 @@ Shader::Shader(std::string_view vertex, std::string_view fragment, std::string_v
         {
             shader_info += fmt::format("\t- {} -> '{}'\n", intern::ShaderTypeNames[i], paths[i]);
         }
-        glfwd_ERROR("Failed to link shaders\n{}{}", shader_info, error_message);
+        GLFWD_ERROR("Failed to link shaders\n{}{}", shader_info, error_message);
         return;
     }
 
@@ -213,7 +213,7 @@ void Shader::PushConstant(const Texture* texture, uint32_t active_id) const
 
 uint32_t Shader::GetUniformLocation(std::string_view location) const
 {
-    glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(location);
+    GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(location);
     return glGetUniformLocation(m_ID, location.data());
 }
 

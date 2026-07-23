@@ -33,7 +33,7 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         SDL_IOStream* stream = SDL_IOFromConstMem(buffer, buffer_size);
         if (!stream)
         {
-            glfwd_ERROR("Failed to load embedded {} texture buffer as a stream: {}",
+            GLFWD_ERROR("Failed to load embedded {} texture buffer as a stream: {}",
                         s_TextureTypeNames[(int)info.Type],
                         SDL_GetError());
             return;
@@ -42,7 +42,7 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         SDL_Surface* image_surface = IMG_Load_IO(stream, 1);
         if (!image_surface)
         {
-            glfwd_ERROR("Failed to load embedded {} texture buffer: {}",
+            GLFWD_ERROR("Failed to load embedded {} texture buffer: {}",
                         s_TextureTypeNames[(int)info.Type],
                         SDL_GetError());
             SDL_CloseIO(stream);
@@ -52,7 +52,7 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         if (SetSizeFromSurface(image_surface, info))
             LoadOpenGLTexture(image_surface, info);
         else
-            glfwd_ERROR("Failed to load embedded {} texture", s_TextureTypeNames[(int)info.Type]);
+            GLFWD_ERROR("Failed to load embedded {} texture", s_TextureTypeNames[(int)info.Type]);
         SDL_DestroySurface(image_surface);
     }
 }
@@ -60,12 +60,12 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
 Texture::Texture(std::string_view path, const TextureCreateInfo info)
     : m_Type(info.Type)
 {
-    glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(path);
+    GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(path);
 
     SDL_Surface* image_surface = IMG_Load(path.data());
     if (!image_surface)
     {
-        glfwd_ERROR("Failed to load surface at path {}: {}", path, SDL_GetError());
+        GLFWD_ERROR("Failed to load surface at path {}: {}", path, SDL_GetError());
         return;
     }
 
@@ -75,7 +75,7 @@ Texture::Texture(std::string_view path, const TextureCreateInfo info)
     }
     else
     {
-        glfwd_ERROR(
+        GLFWD_ERROR(
             "Failed to load {} texture from path {}", s_TextureTypeNames[(int)info.Type], path);
     }
     SDL_DestroySurface(image_surface);
@@ -88,7 +88,7 @@ Texture::Texture(SDL_Surface* surface, const TextureCreateInfo info)
     {
         if (info.Width < 0 || info.Height < 0)
         {
-            glfwd_ERROR(
+            GLFWD_ERROR(
                 "Cannot create {} without a surface provided or at least a width and height",
                 s_TextureTypeNames[(int)info.Type]);
             return;
@@ -160,7 +160,7 @@ void Texture::LoadFromSurface(SDL_Surface* image_surface, const TextureCreateInf
     case TextureFormat::Depth24:
     case TextureFormat::Depth32f:
     case TextureFormat::Depth24Stencil8:
-        glfwd_ERROR("Do not provide image data when setting the format to Depth24. Will still "
+        GLFWD_ERROR("Do not provide image data when setting the format to Depth24. Will still "
                     "create texture but ignore image data.");
         LoadOpenGLTexture(nullptr, info);
         return;
@@ -176,7 +176,7 @@ void Texture::LoadFromSurface(SDL_Surface* image_surface, const TextureCreateInf
         SDL_Surface* surface = SDL_ConvertSurface(image_surface, pixel_format);
         if (!surface)
         {
-            glfwd_ERROR("Failed to convert image texture to desired format: {}", SDL_GetError());
+            GLFWD_ERROR("Failed to convert image texture to desired format: {}", SDL_GetError());
             return;
         }
         LoadOpenGLTexture(surface, info);
@@ -200,7 +200,7 @@ bool Texture::LoadOpenGLTexture(SDL_Surface* surface, const TextureCreateInfo& i
         int32_t sample_count = info.Sample == 0 ? OpenGLContext::GetMaxMSAASamples() : info.Sample;
 
         if (info.Type != TextureType::Tex2D)
-            glfwd_WARN("Texture type not set to TextureType::Tex2D when creating a multi-sampled "
+            GLFWD_WARN("Texture type not set to TextureType::Tex2D when creating a multi-sampled "
                        "texture. Will overwrite and set to Tex2D with multi-sampling enabled");
 
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_ID);
@@ -273,7 +273,7 @@ bool Texture::LoadOpenGLTexture(SDL_Surface* surface, const TextureCreateInfo& i
     if (info.Mipmap != MipmapMode::None)
         glGenerateMipmap(type);
 
-    glfwd_INFO("Successfully initialized {} ({}, {})",
+    GLFWD_INFO("Successfully initialized {} ({}, {})",
                s_TextureTypeNames[(int)info.Type],
                m_Width,
                m_Height);
@@ -285,12 +285,12 @@ bool Texture::LoadOpenGLCubeMapFromSurface(SDL_Surface* surface, const TextureCr
 {
     if (!surface)
     {
-        glfwd_ERROR("Cube map texture must provide a surface to create");
+        GLFWD_ERROR("Cube map texture must provide a surface to create");
         return false;
     }
     if (info.Format > TextureFormat::RGBA)
     {
-        glfwd_ERROR("Invalid texture format for creating a cube map. Must be a color format not a "
+        GLFWD_ERROR("Invalid texture format for creating a cube map. Must be a color format not a "
                     "depth/stencil");
         return false;
     }
@@ -345,7 +345,7 @@ bool Texture::SetSizeFromSurface(SDL_Surface* surface, const TextureCreateInfo& 
         }
         return true;
     }
-    glfwd_ERROR("Surface is null, cannot determine texture width and height");
+    GLFWD_ERROR("Surface is null, cannot determine texture width and height");
     return false;
 }
 

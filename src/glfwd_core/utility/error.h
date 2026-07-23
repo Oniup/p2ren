@@ -27,13 +27,12 @@ namespace intern {
     bool Error_ShouldFilter(ErrorSeverity severity);
 
     /// Prints the header of the error message
-    void Error_PrintErrorHeaderMessage(ErrorSeverity severity, std::string_view file,
-                                       std::string_view function, int line,
-                                       std::string_view expression);
+    void Error_PrintAssertHeader(ErrorSeverity severity, std::string_view file,
+                                 std::string_view function, int line, std::string_view expression);
 
     /// Prints error message
-    void Error_PrintAssertErrorMessage(ErrorSeverity severity, std::string_view file,
-                                       std::string_view function, int line);
+    void Error_PrintHeader(ErrorSeverity severity, std::string_view file, std::string_view function,
+                           int line);
 
     /// Uses Error_PrintErrorHeaderMessage and Error_PrintAssertErrorMessage to format an assert
     /// message utilizing libfmt for string manipulation
@@ -47,7 +46,7 @@ namespace intern {
                         std::string_view expression, fmt::format_string<Args...> format,
                         Args&&... args)
     {
-        Error_PrintErrorHeaderMessage(ErrorSeverity::Fatal, file, function, line, expression);
+        Error_PrintAssertHeader(ErrorSeverity::Fatal, file, function, line, expression);
 
         fmt::println(stderr, format, std::forward<Args>(args)...);
         std::fflush(stderr);
@@ -62,7 +61,7 @@ namespace intern {
         if (Error_ShouldFilter(severity))
             return;
 
-        Error_PrintAssertErrorMessage(severity, file, function, line);
+        Error_PrintHeader(severity, file, function, line);
 
         fmt::println(stderr, format, std::forward<Args>(args)...);
         std::fflush(stderr);
@@ -85,7 +84,7 @@ namespace intern {
 #endif
 
 #ifndef NDEBUG
-#    define glfwd_ASSERT(expression_, ...)                                                         \
+#    define GLFWD_ASSERT(expression_, ...)                                                         \
         do                                                                                         \
         {                                                                                          \
             if (!(expression_))                                                                    \
@@ -98,15 +97,15 @@ namespace intern {
         }                                                                                          \
         while (false)
 
-#    define glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(str_)                                         \
-        glfwd_ASSERT(                                                                              \
+#    define GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(str_)                                         \
+        GLFWD_ASSERT(                                                                              \
             str_.data()[str_.size()] == '\0', "name parameter '{}' must be null terminated", str_)
 #else
-#    define glfwd_ASSERT(expression_, ...)
-#    define glfwd_ASSERT_STRING_VIEW_NULL_TERMINATED(str_)
+#    define GLFWD_ASSERT(expression_, ...)
+#    define GLFWD_ASSERT_STRING_VIEW_NULL_TERMINATED(str_)
 #endif
 
-#define glfwd_FATAL(...)                                                                           \
+#define GLFWD_FATAL(...)                                                                           \
     do                                                                                             \
     {                                                                                              \
         glfwd::intern::Error_OnLog(                                                                \
@@ -116,14 +115,14 @@ namespace intern {
     }                                                                                              \
     while (false)
 
-#define glfwd_INFO(...)                                                                            \
+#define GLFWD_INFO(...)                                                                            \
     glfwd::intern::Error_OnLog(                                                                    \
         glfwd::ErrorSeverity::Low, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
-#define glfwd_WARN(...)                                                                            \
+#define GLFWD_WARN(...)                                                                            \
     glfwd::intern::Error_OnLog(                                                                    \
         glfwd::ErrorSeverity::Medium, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
-#define glfwd_ERROR(...)                                                                           \
+#define GLFWD_ERROR(...)                                                                           \
     glfwd::intern::Error_OnLog(                                                                    \
         glfwd::ErrorSeverity::High, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)

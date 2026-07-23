@@ -24,11 +24,8 @@ public:
     void Run();
 
 protected:
-    /// Iterate over all directories and check if its the 'assets' folder, otherwise check the
-    /// parent path until successfully found the directory. Will crash if can't find.
-    static std::string FindAssetDirectory();
-
     virtual void OnInitialize()                                 = 0;
+    virtual void OnEvent(const SDL_Event& event)                = 0;
     virtual void OnUpdate(const Timestep& timestep)             = 0;
     virtual void OnLateUpdate(const Timestep& timestep)         = 0;
     virtual void SubmitToRenderQueue(RenderQueue* render_queue) = 0;

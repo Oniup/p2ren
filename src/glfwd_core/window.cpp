@@ -80,7 +80,7 @@ Window::Window(const WindowCreateInfo& info)
             width  = display_mode->w / 2;
             height = display_mode->h / 2;
 
-            glfwd_WARN("Cannot set resolution size ({}, {}) as it exceeds monitor ({}, {}), using "
+            GLFWD_WARN("Cannot set resolution size ({}, {}) as it exceeds monitor ({}, {}), using "
                        "fallback size ({}, {})",
                        info.Width,
                        info.Height,
@@ -103,12 +103,12 @@ Window::Window(const WindowCreateInfo& info)
 
     m_Window = SDL_CreateWindow(info.Title.c_str(), width, height, flags);
     if (!m_Window)
-        glfwd_FATAL("Failed to create SDL window: {}", SDL_GetError());
+        GLFWD_FATAL("Failed to create SDL window: {}", SDL_GetError());
 
     if (info.Resolution == WindowResolution::Custom)
-        glfwd_INFO("Create window with resolution: {}, {}", width, height);
+        GLFWD_INFO("Create window with resolution: {}, {}", width, height);
     else
-        glfwd_INFO("Create window with resolution: {}, actual resolution: ({}, {})",
+        GLFWD_INFO("Create window with resolution: {}, actual resolution: ({}, {})",
                    GetResolutionAsString(resolution),
                    width,
                    height);
@@ -209,7 +209,7 @@ void Window::SetSize(uint32_t display_id, int32_t width, int32_t height, bool ce
 
     if (width > display_mode->w || height > display_mode->h)
     {
-        glfwd_WARN("Cannot set resolution size ({}, {}) as it exceeds monitor ({}, {})",
+        GLFWD_WARN("Cannot set resolution size ({}, {}) as it exceeds monitor ({}, {})",
                    width,
                    height,
                    display_mode->w,
@@ -235,7 +235,7 @@ void Window::SetSize(uint32_t display_id, WindowResolution& resolution, bool cen
     auto [width, height] = Window::GetResolutionSize(resolution);
     if (width > display_mode->w)
     {
-        glfwd_WARN("Cannot set resolution size ({}) as it exceeds monitor ({}, {})",
+        GLFWD_WARN("Cannot set resolution size ({}) as it exceeds monitor ({}, {})",
                    GetResolutionAsString(resolution),
                    display_mode->w,
                    display_mode->h);

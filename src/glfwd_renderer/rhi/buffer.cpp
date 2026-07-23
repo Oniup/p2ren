@@ -174,7 +174,7 @@ bool Buffer::PushSubData(const void* data, size_t stride_size, size_t size, size
         return true;
     }
 
-    glfwd_ERROR("Didn't push sub data to {} buffer as the size {} + offset {} = {} is greater than "
+    GLFWD_ERROR("Didn't push sub data to {} buffer as the size {} + offset {} = {} is greater than "
                 "the allocated size {}",
                 ConvertTypeToString(m_Type),
                 size,
@@ -315,11 +315,11 @@ void VertexArray::Draw(PrimitiveMode mode, uint32_t offset, uint32_t size) const
     if (m_ElementBuffer.IsValid())
     {
         size = size == 0 ? m_ElementBuffer.GetSize() : size;
-        glfwd_ASSERT(size <= m_ElementBuffer.GetSize(),
+        GLFWD_ASSERT(size <= m_ElementBuffer.GetSize(),
                      "Size cannot exceed the element buffers size {}",
                      size,
                      m_ElementBuffer.GetSize());
-        glfwd_ASSERT(offset <= size, "Offset {} cannot exceed the size {}", offset, size);
+        GLFWD_ASSERT(offset <= size, "Offset {} cannot exceed the size {}", offset, size);
         glDrawElements(gl_primitive,
                        size,
                        GL_UNSIGNED_INT,
@@ -339,7 +339,7 @@ void VertexArray::Draw(PrimitiveMode mode, uint32_t offset, uint32_t size) const
             size_t total_size = 0;
             for (const Buffer& buffer : m_ArrayBuffers)
                 total_size += buffer.GetSize();
-            glfwd_ASSERT(size <= total_size,
+            GLFWD_ASSERT(size <= total_size,
                          "Size cannot exceed the collective array buffers ({} total) size {}",
                          size,
                          m_ArrayBuffers.size(),
@@ -347,7 +347,7 @@ void VertexArray::Draw(PrimitiveMode mode, uint32_t offset, uint32_t size) const
         }
 #endif
 
-        glfwd_ASSERT(offset >= size, "Offset {} cannot exceed the size {}", offset, size);
+        GLFWD_ASSERT(offset >= size, "Offset {} cannot exceed the size {}", offset, size);
         glDrawArrays(gl_primitive, offset, size);
     }
 }
@@ -378,7 +378,7 @@ void VertexArray::InitializeAttributes(const VertexAttribute* attributes, size_t
 
         if (attributes[i].BufferIndex >= m_ArrayBuffers.size())
         {
-            glfwd_ERROR(
+            GLFWD_ERROR(
                 "Vertex attribute 'BufferIndex' is larger than the actual Array Buffer count");
             glDeleteVertexArrays(1, &m_ID);
             m_ID = 0;

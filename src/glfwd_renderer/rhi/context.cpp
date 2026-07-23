@@ -49,10 +49,10 @@ void GLAPIENTRY glDebugOutputCallback(GLenum source, GLenum type, unsigned int i
 
     switch (severity)
     {
-    case GL_DEBUG_SEVERITY_HIGH:         glfwd_FATAL(EFMT, id, source_str, type_str, message); break;
-    case GL_DEBUG_SEVERITY_MEDIUM:       glfwd_ERROR(EFMT, id, source_str, type_str, message); break;
-    case GL_DEBUG_SEVERITY_LOW:          glfwd_WARN(EFMT, id, source_str, type_str, message); break;
-    case GL_DEBUG_SEVERITY_NOTIFICATION: glfwd_INFO(EFMT, id, source_str, type_str, message); break;
+    case GL_DEBUG_SEVERITY_HIGH:         GLFWD_FATAL(EFMT, id, source_str, type_str, message); break;
+    case GL_DEBUG_SEVERITY_MEDIUM:       GLFWD_ERROR(EFMT, id, source_str, type_str, message); break;
+    case GL_DEBUG_SEVERITY_LOW:          GLFWD_WARN(EFMT, id, source_str, type_str, message); break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION: GLFWD_INFO(EFMT, id, source_str, type_str, message); break;
     }
 }
 
@@ -157,11 +157,11 @@ int32_t OpenGLContext::GetMaxAnisotropy()
 
 OpenGLContext::OpenGLContext(bool enable_hardware_debug_callback)
 {
-    glfwd_ASSERT(!s_Instance,
+    GLFWD_ASSERT(!s_Instance,
                  "RHI/OpenGL Context has already been initialized, cannot have 2 instances");
 
     if (!SDL_Init(SDL_INIT_VIDEO))
-        glfwd_FATAL("Failed to initialize SDL: {}", SDL_GetError());
+        GLFWD_FATAL("Failed to initialize SDL: {}", SDL_GetError());
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
@@ -185,16 +185,16 @@ void OpenGLContext::InitializeBackend(Window* window)
 {
     m_InternalContext = SDL_GL_CreateContext(window->GetInternalContext());
     if (!m_InternalContext)
-        glfwd_FATAL("Failed to initialize OpenGL context: {}", SDL_GetError());
+        GLFWD_FATAL("Failed to initialize OpenGL context: {}", SDL_GetError());
 
     // Initialize glad
     int glad_version = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
     if (glad_version == 0)
     {
         Terminate();
-        glfwd_FATAL("Failed to initialize OpenGL pointer functions through glad loader");
+        GLFWD_FATAL("Failed to initialize OpenGL pointer functions through glad loader");
     }
-    glfwd_INFO("Initialized OpenGL {}.{}",
+    GLFWD_INFO("Initialized OpenGL {}.{}",
                GLAD_VERSION_MAJOR(glad_version),
                GLAD_VERSION_MINOR(glad_version));
 

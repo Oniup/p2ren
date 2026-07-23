@@ -4,7 +4,9 @@
 int main()
 {
     glfwd_example::Game game;
-    game.Initialize(glfwd::ApplicationCreateInfo{});
+    game.Initialize(glfwd::ApplicationCreateInfo{
+        .AssetDirectory = game.FindAssetDirectory(),
+    });
     game.Run();
 
     return 0;

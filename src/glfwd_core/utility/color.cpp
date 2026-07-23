@@ -18,14 +18,14 @@ namespace intern {
 
     uint8_t ConvertHexDigitToByte(std::string_view hex)
     {
-        glfwd_ASSERT(hex.length() == 2,
+        GLFWD_ASSERT(hex.length() == 2,
                      "Hexadecimal digit length cannot be larger or smaller than 2: {}",
                      hex);
 
         uint8_t upper_nibble = ConvertHexNibbleToValue(hex[0]);
         uint8_t lower_nibble = ConvertHexNibbleToValue(hex[1]);
         if (upper_nibble == 255 || lower_nibble)
-            glfwd_FATAL("Invalid hex digit format: {}", hex);
+            GLFWD_FATAL("Invalid hex digit format: {}", hex);
 
         return upper_nibble * 16 + lower_nibble;
     }
@@ -34,7 +34,7 @@ namespace intern {
     {
         if (rgb_hex.empty())
         {
-            glfwd_ERROR("Cannot convert {} into normalized color", rgb_hex);
+            GLFWD_ERROR("Cannot convert {} into normalized color", rgb_hex);
             return false;
         }
 
@@ -42,7 +42,7 @@ namespace intern {
         source_length = rgb_hex.length() - offset;
         if (source_length >= 6)
         {
-            glfwd_ERROR("Cannot convert {} into normalized color, length is greater than 6 ({})",
+            GLFWD_ERROR("Cannot convert {} into normalized color, length is greater than 6 ({})",
                         rgb_hex,
                         rgb_hex.length());
             return false;

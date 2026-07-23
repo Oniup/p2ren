@@ -80,7 +80,7 @@ public:
         if (Contains(handle))
             return &m_Data[handle.m_Index];
 
-        glfwd_ERROR("Cannot query resource '{}' with ID {}, it doesn't exist within pool",
+        GLFWD_ERROR("Cannot query resource '{}' with ID {}, it doesn't exist within pool",
                     TypeInfo<T>::GetName(),
                     handle.m_ID);
         return nullptr;
@@ -91,7 +91,7 @@ public:
         if (Contains(handle))
             return &m_Data[handle.m_Index];
 
-        glfwd_ERROR("Cannot query resource '{}' with ID {}, it doesn't exist within pool",
+        GLFWD_ERROR("Cannot query resource '{}' with ID {}, it doesn't exist within pool",
                     TypeInfo<T>::GetName(),
                     handle.m_ID);
         return nullptr;
@@ -126,7 +126,7 @@ public:
             m_FreeSlots.push_back(handle.m_Index);
             return;
         }
-        glfwd_WARN("Attempt to destroy resource '{}' with ID {}, it doesn't exist within pool",
+        GLFWD_WARN("Attempt to destroy resource '{}' with ID {}, it doesn't exist within pool",
                    TypeInfo<T>::GetName(),
                    handle.m_ID);
     }
@@ -161,7 +161,7 @@ public:
         auto result = fmt::format_to_n(buffer, max_buffer_size, "{}/{}", m_AssetDirectory, path);
         *result.out = '\0';
         if (result.size >= max_buffer_size - 1)
-            glfwd_ERROR("Buffer (max size {}) provided to format path {}/{} was not large enough, "
+            GLFWD_ERROR("Buffer (max size {}) provided to format path {}/{} was not large enough, "
                         "result has been cut off",
                         max_buffer_size,
                         m_AssetDirectory,
@@ -183,7 +183,7 @@ public:
 
         if (ContainsPool<T>())
         {
-            glfwd_WARN("Attempt to initialize pool for resource {} but it already exists",
+            GLFWD_WARN("Attempt to initialize pool for resource {} but it already exists",
                        TypeInfo<T>::GetName());
             return;
         }
@@ -197,7 +197,7 @@ public:
     {
         if (!resource.IsValid())
         {
-            glfwd_ERROR("Cannot add a {} resource that isn't valid on initialization",
+            GLFWD_ERROR("Cannot add a {} resource that isn't valid on initialization",
                         TypeInfo<T>::GetName());
             return ResourceHandle<T>();
         }
@@ -205,7 +205,7 @@ public:
         // If doesn't exist, create a pool
         if (!ContainsPool<T>())
         {
-            glfwd_ERROR(
+            GLFWD_ERROR(
                 "Failed to push resource for type: {0}, it pool doesn't exist, need to call "
                 "InitializePool<{0}>() on program startup",
                 TypeInfo<T>::GetName());

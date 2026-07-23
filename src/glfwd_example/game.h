@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "glfwd_core/resource_handle.h"
 #include "glfwd_core/transform.h"
 #include "glfwd_engine/application.h"
@@ -11,8 +13,12 @@ namespace glfwd_example {
 
 class Game : public glfwd::Application
 {
+public:
+    std::string FindAssetDirectory();
+
 protected:
     void OnInitialize() override;
+    void OnEvent(const SDL_Event& event) override;
     void OnUpdate(const glfwd::Timestep& timestep) override;
     void OnLateUpdate(const glfwd::Timestep& timestep) override;
     void SubmitToRenderQueue(glfwd::RenderQueue* render_queue) override;
