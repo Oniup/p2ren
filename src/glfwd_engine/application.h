@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "glfwd_engine/create_info.h"
 
 namespace glfwd {
@@ -19,8 +17,8 @@ public:
 
     Application() = default;
     virtual ~Application();
-    void Initialize(const ApplicationCreateInfo& create_info);
 
+    void Initialize(const ApplicationCreateInfo& create_info);
     void Run();
 
 protected:

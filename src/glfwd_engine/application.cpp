@@ -63,11 +63,13 @@ void Application::Run()
         while (SDL_PollEvent(&event))
         {
             m_Window->HandleSDLEvents(event);
+
             OnEvent(event);
         }
 
         timestep.CalculateDeltaTime();
 
+        // TODO: Move to Forward renderer
         glClearColor(0.2f, 0.5f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 

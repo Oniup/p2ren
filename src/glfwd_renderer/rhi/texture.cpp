@@ -50,7 +50,15 @@ Texture::Texture(const uint8_t* buffer, size_t buffer_size, const TextureCreateI
         SDL_CloseIO(stream);
 
         if (SetSizeFromSurface(image_surface, info))
-            LoadOpenGLTexture(image_surface, info);
+        {
+            if (LoadOpenGLTexture(image_surface, info))
+            {
+                GLFWD_INFO("Initialized embedded {} ({}, {})",
+                           TEXTURE_TYPE_NAMES[(int)info.Type],
+                           m_Width,
+                           m_Height);
+            }
+        }
         else
             GLFWD_ERROR("Failed to load embedded {} texture", TEXTURE_TYPE_NAMES[(int)info.Type]);
         SDL_DestroySurface(image_surface);
@@ -71,7 +79,14 @@ Texture::Texture(std::string_view path, const TextureCreateInfo info)
 
     if (SetSizeFromSurface(image_surface, info))
     {
-        LoadOpenGLTexture(image_surface, info);
+        if (LoadOpenGLTexture(image_surface, info))
+        {
+            GLFWD_INFO("Initialized {} ({}, {}) from path {}",
+                       TEXTURE_TYPE_NAMES[(int)info.Type],
+                       m_Width,
+                       m_Height,
+                       path);
+        }
     }
     else
     {
@@ -273,10 +288,6 @@ bool Texture::LoadOpenGLTexture(SDL_Surface* surface, const TextureCreateInfo& i
     if (info.Mipmap != MipmapMode::None)
         glGenerateMipmap(type);
 
-    GLFWD_INFO("Successfully initialized {} ({}, {})",
-               TEXTURE_TYPE_NAMES[(int)info.Type],
-               m_Width,
-               m_Height);
     return true;
 }
 
