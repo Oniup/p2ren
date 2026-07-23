@@ -8,25 +8,25 @@ PUBLIC
 
 target_sources(glfwd_renderer
 PUBLIC
+    ./resources/camera.h
     ./resources/material.h
     ./resources/model.h
     ./rhi/buffer.h
     ./rhi/context.h
     ./rhi/shader.h
     ./rhi/texture.h
-    ./camera.h
     ./create_info.h
     ./render_queue.h
     ./draw_modes.h
     ./forward_renderer.h
 PRIVATE
+    ./resources/camera.cpp
     ./resources/material.cpp
     ./resources/model.cpp
     ./rhi/buffer.cpp
     ./rhi/context.cpp
     ./rhi/shader.cpp
     ./rhi/texture.cpp
-    ./camera.cpp
     ./forward_renderer.cpp
 )
 

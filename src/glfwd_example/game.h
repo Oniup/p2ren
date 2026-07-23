@@ -6,6 +6,7 @@
 #include "glfwd_core/transform.h"
 #include "glfwd_engine/application.h"
 #include "glfwd_renderer/render_queue.h"
+#include "glfwd_renderer/resources/camera.h"
 #include "glfwd_renderer/resources/model.h"
 #include "glfwd_renderer/rhi/shader.h"
 
@@ -24,6 +25,7 @@ protected:
     void SubmitToRenderQueue(glfwd::RenderQueue* render_queue) override;
 
 private:
+    glfwd::TargetCamera                  m_Camera;
     glfwd::Transform                     m_Transform;
     glfwd::Mesh                          m_Mesh;
     glfwd::ResourceHandle<glfwd::Shader> m_ShaderHandle;

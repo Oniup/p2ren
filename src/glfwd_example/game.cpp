@@ -4,6 +4,7 @@
 
 #include "glfwd_core/resource_manager.h"
 #include "glfwd_renderer/render_queue.h"
+#include "glfwd_renderer/resources/camera.h"
 
 namespace glfwd_example {
 
@@ -35,8 +36,9 @@ std::string Game::FindAssetDirectory()
 
 void Game::OnInitialize()
 {
-    m_Transform    = glfwd::Transform{};
-    m_ShaderHandle = m_ResourceManager->QueryHandle<glfwd::Shader>("Basic Blinn-Phong");
+    m_Camera.Position = glm::vec3(0.0f, 0.0f, -5.0f);
+    m_Transform       = glfwd::Transform{};
+    m_ShaderHandle    = m_ResourceManager->QueryHandle<glfwd::Shader>("Basic Blinn-Phong");
 
     glfwd::TextureCreateInfo default_create_info{
         .MinFilter  = glfwd::TextureFilter::Linear,
@@ -78,6 +80,12 @@ void Game::SubmitToRenderQueue(glfwd::RenderQueue* render_queue)
     glfwd::Shader* shader = m_ResourceManager->QueryResource(m_ShaderHandle);
     shader->Bind();
     shader->PushConstant("u_Model", m_Transform.CreateModelMatrix());
+
+    glfwd::RenderCamera render_camera =
+        m_Camera.GetRenderCamera(m_Window->GetWidth(), m_Window->GetHeight());
+
+    shader->PushConstant("u_Projection", render_camera.ProjectionMatrix);
+    shader->PushConstant("u_View", render_camera.ViewMatrix);
     m_Mesh.GetMaterial().PushConstantsToShader(shader, m_ResourceManager);
 
     m_Mesh.Draw(glfwd::PrimitiveMode::Triangles);
